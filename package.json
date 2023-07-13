@@ -1,7 +1,7 @@
 {
-  "name": "@gethinode/mod-template",
+  "name": "@gethinode/mod-flexsearch",
   "version": "0.0.0",
-  "description": "A template to define a Hugo module compatible with Hinode",
+  "description": "A Hugo module to add full text search powered by FlexSearch to your Hinode site (work in progress)",
   "keywords": [
     "hugo",
     "module"
@@ -12,17 +12,20 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "prebuild": "npm run clean",
+    "prestart": "npm run clean && npm run mod:vendor",
+    "start": "hugo server -s exampleSite --bind=0.0.0.0 --disableFastRender --printI18nWarnings",
+    "prebuild": "npm run clean && npm run mod:vendor",
     "build": "hugo --gc --minify -s exampleSite",
     "clean": "rimraf exampleSite/public exampleSite/resources",
-    "mod:tidy": "hugo mod tidy -s exampleSite",
-    "mod:update": "npm run -s mod:tidy && hugo mod get -u -s exampleSite",
+    "mod:tidy": "hugo mod tidy && hugo mod tidy -s exampleSite",
+    "mod:update": "npm run -s mod:tidy && hugo mod get -u ./...",
+    "mod:vendor": "hugo mod vendor",
     "postinstall": "echo TODO: add postinstall instructions",
     "test": "npm run -s build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gethinode/mod-template.git"
+    "url": "git+https://github.com/gethinode/mod-flexsearch.git"
   },
   "author": "Mark Dumay",
   "license": "MIT",

@@ -1,8 +1,8 @@
-# Hinode Module - Template
+# Hinode Module - FlexSearch
 
 <!-- Tagline -->
 <p align="center">
-    <b>A template to define a Hugo module compatible with Hinode (work in progress)</b>
+    <b>A Hugo module to add full text search powered by FlexSearch to your Hinode site (work in progress)</b>
     <br />
 </p>
 
@@ -14,17 +14,17 @@
     <a href="https://gethinode.com" alt="Hinode theme">
         <img src="https://img.shields.io/badge/theme-hinode-blue">
     </a>
-    <a href="https://github.com/gethinode/mod-template/commits/main" alt="Last commit">
-        <img src="https://img.shields.io/github/last-commit/gethinode/mod-template.svg">
+    <a href="https://github.com/gethinode/mod-flexsearch/commits/main" alt="Last commit">
+        <img src="https://img.shields.io/github/last-commit/gethinode/mod-flexsearch.svg">
     </a>
-    <a href="https://github.com/gethinode/mod-template/issues" alt="Issues">
-        <img src="https://img.shields.io/github/issues/gethinode/mod-template.svg">
+    <a href="https://github.com/gethinode/mod-flexsearch/issues" alt="Issues">
+        <img src="https://img.shields.io/github/issues/gethinode/mod-flexsearch.svg">
     </a>
-    <a href="https://github.com/gethinode/mod-template/pulls" alt="Pulls">
-        <img src="https://img.shields.io/github/issues-pr-raw/gethinode/mod-template.svg">
+    <a href="https://github.com/gethinode/mod-flexsearch/pulls" alt="Pulls">
+        <img src="https://img.shields.io/github/issues-pr-raw/gethinode/mod-flexsearch.svg">
     </a>
-    <a href="https://github.com/gethinode/mod-template/blob/main/LICENSE" alt="License">
-        <img src="https://img.shields.io/github/license/gethinode/mod-template">
+    <a href="https://github.com/gethinode/mod-flexsearch/blob/main/LICENSE" alt="License">
+        <img src="https://img.shields.io/github/license/gethinode/mod-flexsearch">
     </a>
 </p>
 
@@ -32,11 +32,11 @@
 
 ![Logo](https://raw.githubusercontent.com/gethinode/hinode/main/static/img/logo.png)
 
-Hinode is a clean blog theme for [Hugo][hugo], an open-source static site generator. Hinode is available as a [template][repository_template], and a [main theme][repository]. <!-- This repository maintains a Hugo module to add [module][module] to a Hinode site. --> Visit the Hinode documentation site for [installation instructions][hinode_docs].
+Hinode is a clean blog theme for [Hugo][hugo], an open-source static site generator. Hinode is available as a [template][repository_template], and a [main theme][repository]. This repository maintains a Hugo module to add [FlexSearch][flexsearch] to a Hinode site. Visit the Hinode documentation site for [installation instructions][hinode_docs].
 
 <!-- MARKDOWN LINKS -->
+[flexsearch]: https://github.com/nextapps-de/flexsearch
 [hugo]: https://gohugo.io
 [hinode_docs]: https://gethinode.com
-<!-- [module]: https://example.com -->
 [repository]: https://github.com/gethinode/hinode.git
 [repository_template]: https://github.com/gethinode/template.git

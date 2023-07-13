@@ -1,3 +1,4 @@
-module github.com/gethinode/mod-template-test
+module github.com/gethinode/mod-flexsearch-test
 
 go 1.19
+

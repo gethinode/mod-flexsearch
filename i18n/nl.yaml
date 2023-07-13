@@ -1,0 +1,5 @@
+# Search
+- id: ui_search
+  translation: "Zoeken op deze site..."
+- id: ui_no_results
+  translation: "Geen resultaten voor"

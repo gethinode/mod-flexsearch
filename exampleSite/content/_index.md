@@ -1,7 +1,5 @@
 ---
 title: Test site
-description: Site to test module shortcode(s).
+description: Site to test FlexSearch module.
 date: 2023-07-10
 ---
-
-TODO: placeholder

@@ -20,7 +20,6 @@
     "mod:tidy": "hugo mod tidy && hugo mod tidy -s exampleSite",
     "mod:update": "npm run -s mod:tidy && hugo mod get -u ./...",
     "mod:vendor": "hugo mod vendor",
-    "postinstall": "echo TODO: add postinstall instructions",
     "test": "npm run -s build"
   },
   "repository": {

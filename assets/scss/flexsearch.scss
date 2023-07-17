@@ -1,28 +1,31 @@
-// $font-size-base:              1rem !default; // Assumes the browser default, typically `16px`
+{{ if not (in site.Params.modules.core "bootstrap") }}
 
-// $grid-breakpoints: (
-//   xs: 0,
-//   sm: 480px,
-//   md: 768px,
-//   lg: 1024px
-// );
+$font-size-base:              1rem !default; // Assumes the browser default, typically `16px`
 
-// $headings-font-weight:        500 !default;
+$grid-breakpoints: (
+  xs: 0,
+  sm: 480px,
+  md: 768px,
+  lg: 1024px
+);
 
-// $zindex-dropdown:                   1000 !default;
+$headings-font-weight:        500 !default;
 
-// // Media of at least the minimum breakpoint width. No query for the smallest breakpoint.
-// // Makes the @content apply to the given breakpoint and wider.
-// @mixin media-breakpoint-up($name, $breakpoints: $grid-breakpoints) {
-//     $min: breakpoint-min($name, $breakpoints);
-//     @if $min {
-//       @media (min-width: $min) {
-//         @content;
-//       }
-//     } @else {
-//       @content;
-//     }
-//   }
+$zindex-dropdown:                   1000 !default;
+
+// Media of at least the minimum breakpoint width. No query for the smallest breakpoint.
+// Makes the @content apply to the given breakpoint and wider.
+@mixin media-breakpoint-up($name, $breakpoints: $grid-breakpoints) {
+    $min: breakpoint-min($name, $breakpoints);
+    @if $min {
+      @media (min-width: $min) {
+        @content;
+      }
+    } @else {
+      @content;
+    }
+  }
+{{ end }}
 
 // Adapted from https://github.com/h-enk/doks
 

@@ -23,6 +23,7 @@ function initIndex() {
   {{ $list := where (where site.AllPages "Kind" "in" "page") "Title" "!=" "" }}
   {{ $len := (len $list) -}}
 
+  {{ if gt $len 0 }}
   index.add(
     {{ range $index, $element := $list -}}
       {
@@ -42,6 +43,7 @@ function initIndex() {
       {{ end -}}
     {{ end -}}
   ;
+  {{ end }}
 
   search.addEventListener('input', showResults, true);
 }

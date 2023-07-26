@@ -36,7 +36,7 @@ function initIndex() {
         {{ else -}}
           description: {{ .Summary | plainify | jsonify }},
         {{ end -}}
-        content: {{ .Plain | jsonify }}
+        content: {{ (replaceRE "[{}]" "" .Plain) | jsonify }}
       })
       {{ if ne (add $index 1) $len -}}
         .add(

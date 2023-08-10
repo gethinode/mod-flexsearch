@@ -1,0 +1,5 @@
+# Search
+- id: ui_search
+  translation: "Rechercher..."
+- id: ui_no_results
+  translation: "Aucun résultat pour"

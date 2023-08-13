@@ -1,5 +1,6 @@
-var search = document.getElementById('search');
-var suggestions = document.getElementById('suggestions');
+const search = document.querySelector('.search-input')
+const suggestions = document.querySelector('.search-suggestions')
+
 var index = new FlexSearch.Document({
   tokenize: "forward",
   cache: 100,

@@ -1,7 +1,7 @@
 {
   "name": "@gethinode/mod-flexsearch",
   "version": "1.4.0",
-  "description": "A Hugo module to add full text search powered by FlexSearch to your Hinode site (work in progress)",
+  "description": "A Hugo module to add full text search powered by FlexSearch to your Hinode site",
   "keywords": [
     "hugo",
     "module"

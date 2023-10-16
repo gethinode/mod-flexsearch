@@ -161,3 +161,13 @@ if (search !== null && suggestions !== null) {
   document.addEventListener('click', hideSuggestions);
   initIndex();
 }
+
+const searchModal = document.getElementById('search-modal')
+if (searchModal !== null) {
+  searchModal.addEventListener('shown.bs.modal', function () {
+    const searchInput = document.getElementById('search-input-modal')
+    if (searchInput !== null) {
+      searchInput.focus({ focusVisible: true })
+    }
+  })
+}

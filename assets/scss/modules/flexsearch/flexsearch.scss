@@ -6,6 +6,10 @@
         margin-top: 0.125rem;
         margin-bottom: 0.125rem;
     }
+
+    .search-modal .search {
+        max-width: 100% !important;
+    }
 }
 
 .form-control.is-search {
@@ -45,6 +49,11 @@
     margin-top: 0.5rem;
     width: calc(100vw - 3rem);
     z-index: $zindex-dropdown;
+}
+
+.search-modal .search-suggestions {
+    position: relative;
+    width: 100% !important;
 }
 
 .search-suggestions a,
@@ -98,6 +107,10 @@
         width: 31.125rem;
     }
 
+    .search-modal .search-suggestions {
+        width: 100% !important;
+    }
+
     .search-suggestions a {
         display: flex;
     }
@@ -110,8 +123,16 @@
         text-align: right;
     }
 
+    .search-modal .suggestion__title {
+        width: 15rem !important;
+    }
+
     .suggestion__description {
         width: 19rem;
         padding-left: 1rem;
+    }
+
+    .search-modal .suggestion__description {
+        width: 100% !important;
     }
 }

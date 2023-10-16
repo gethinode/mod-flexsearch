@@ -1,5 +1,5 @@
 # Search
 - id: ui_search
-  translation: "Durchsuche diese Seite..."
+  translation: "Durchsuche diese Seite"
 - id: ui_no_results
   translation: "Keine Ergebnisse für"

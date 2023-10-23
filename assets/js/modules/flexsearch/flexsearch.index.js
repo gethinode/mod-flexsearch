@@ -1,5 +1,6 @@
 const search = document.querySelector('.search-input')
 const suggestions = document.querySelector('.search-suggestions')
+const background = document.querySelector('.search-background')
 
 var index = new FlexSearch.Document({
   tokenize: "forward",
@@ -53,7 +54,10 @@ function hideSuggestions(e) {
   var isClickInsideElement = suggestions.contains(e.target);
 
   if (!isClickInsideElement) {
-    suggestions.classList.add('d-none');
+    suggestions.classList.add('d-none')
+    if (background !== null ) {
+      background.style.setProperty('--image-opacity', '0.1')
+    }
   }
 }
 
@@ -107,18 +111,30 @@ function showResults() {
   var searchQuery = this.value;
   // filter the results for the currently tagged language
   const lang = document.documentElement.lang;
-  var results = index.search(searchQuery, { index: ['title', 'description', 'content'], limit: maxResult, tag: lang, enrich: true });
+  var results = null;
+  if (searchQuery) {
+    results = index.search(searchQuery, { index: ['title', 'description', 'content'], limit: maxResult, tag: lang, enrich: true });
+    if (background !== null) {
+      background.style.setProperty('--image-opacity', '0')
+    }
+  } else {
+    if (background !== null) {
+      background.style.setProperty('--image-opacity', '0.1')
+    }
+  }
 
   // flatten results since index.search() returns results for each indexed field
   const flatResults = new Map(); // keyed by href to dedupe results
-  for (const result of results.flatMap(r => r.result)) {
-    if (flatResults.has(result.doc.href)) continue;
-    flatResults.set(result.doc.href, result.doc);
+  if (results !== null) {
+    for (const result of results.flatMap(r => r.result)) {
+      if (flatResults.has(result.doc.href)) continue;
+      flatResults.set(result.doc.href, result.doc);
+    }
   }
 
   suggestions.innerHTML = "";
   suggestions.classList.remove('d-none');
-
+  
   // inform user that no results were found
   if (flatResults.size === 0 && searchQuery) {
     const msg = suggestions.dataset.noResults;

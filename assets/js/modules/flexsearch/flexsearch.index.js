@@ -28,20 +28,22 @@ function initIndex() {
   {{ if gt $len 0 }}
   index.add(
     {{ range $index, $element := $list -}}
-      {
-        id: {{ $index }},
-        tag: "{{ .Lang }}",
-        href: "{{ .RelPermalink }}",
-        title: {{ .Title | jsonify }},
-        {{ with .Description -}}
-          description: {{ . | jsonify }},
-        {{ else -}}
-          description: {{ .Summary | plainify | jsonify }},
+      {{ if not $element.Params.searchExclude }}
+        {
+          id: {{ $index }},
+          tag: "{{ .Lang }}",
+          href: "{{ .RelPermalink }}",
+          title: {{ .Title | jsonify }},
+          {{ with .Description -}}
+            description: {{ . | jsonify }},
+          {{ else -}}
+            description: {{ .Summary | plainify | jsonify }},
+          {{ end -}}
+          content: {{ (replaceRE "[{}]" "" .Plain) | jsonify }}
+        })
+        {{ if ne (add $index 1) $len -}}
+          .add(
         {{ end -}}
-        content: {{ (replaceRE "[{}]" "" .Plain) | jsonify }}
-      })
-      {{ if ne (add $index 1) $len -}}
-        .add(
       {{ end -}}
     {{ end -}}
   ;

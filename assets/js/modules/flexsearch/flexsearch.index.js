@@ -23,27 +23,26 @@ function initIndex() {
   // Note: uses .Site.AllPages as .Site.RegularPages only returns content for the current language;
   //       pages without a title (such as browserconfig.xml) are excluded
   {{ $list := where (where site.AllPages "Kind" "in" "page") "Title" "!=" "" }}
+  {{ $list = where $list ".Params.searchExclude" "!=" true }}
   {{ $len := (len $list) -}}
 
   {{ if gt $len 0 }}
   index.add(
-    {{ range $index, $element := $list -}}
-      {{ if not $element.Params.searchExclude }}
-        {
-          id: {{ $index }},
-          tag: "{{ .Lang }}",
-          href: "{{ .RelPermalink }}",
-          title: {{ .Title | jsonify }},
-          {{ with .Description -}}
-            description: {{ . | jsonify }},
-          {{ else -}}
-            description: {{ .Summary | plainify | jsonify }},
-          {{ end -}}
-          content: {{ (replaceRE "[{}]" "" .Plain) | jsonify }}
-        })
-        {{ if ne (add $index 1) $len -}}
-          .add(
+    {{ range $index, $element := sort $list "Title" "asc" -}}
+      {
+        id: {{ $index }},
+        tag: "{{ .Lang }}",
+        href: "{{ .RelPermalink }}",
+        title: {{ .Title | jsonify }},
+        {{ with .Description -}}
+          description: {{ . | jsonify }},
+        {{ else -}}
+          description: {{ .Summary | plainify | jsonify }},
         {{ end -}}
+        content: {{ (replaceRE "[{}]" "" .Plain) | jsonify }}
+      })
+      {{ if ne (add $index 1) $len -}}
+        .add(
       {{ end -}}
     {{ end -}}
   ;

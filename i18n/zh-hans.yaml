@@ -1,0 +1,5 @@
+# Search
+- id: ui_search
+  translation: "搜索本站"
+- id: ui_no_results
+  translation: "没有结果"

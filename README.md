@@ -3,7 +3,7 @@
 <!-- Tagline -->
 <p align="center">
     <b>A Hugo module to add full text search powered by FlexSearch to your Hinode site</b>
-    <br />
+    <br>
 </p>
 
 <!-- Badges -->

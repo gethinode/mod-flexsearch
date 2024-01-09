@@ -18,7 +18,7 @@
     "build": "hugo --gc --minify -s exampleSite",
     "clean": "rimraf exampleSite/public exampleSite/resources",
     "mod:tidy": "hugo mod tidy && hugo mod tidy -s exampleSite",
-    "mod:update": "npm run -s mod:tidy && hugo mod get -u ./...",
+    "mod:update": "npm run -s mod:tidy && hugo mod get -u",
     "mod:vendor": "rimraf _vendor && hugo mod vendor",
     "test": "npm run -s build"
   },

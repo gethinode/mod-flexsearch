@@ -39,7 +39,14 @@ function initIndex() {
         {{ else -}}
           description: {{ .Summary | plainify | jsonify }},
         {{ end -}}
-        content: {{ (replaceRE "[{}]" "" .Plain) | jsonify }}
+        {{ $content := (replaceRE "[{}]" "" .Plain) }}
+        {{ if site.Params.modules.flexsearch.frontmatter }}
+          {{ $key := site.Params.modules.flexsearch.filter | default "params" }}
+          {{ $val := slice }}
+          {{ if ne $key "params" }}{{ $val = index .Params $key }}{{ else }}{{ $val = .Params }}{{ end }}
+          {{ $content = printf "%s %s" (partial "assets/search-meta.html" (dict "key" $key "val" $val)) $content }}
+        {{ end }}
+        content: {{ trim $content " \r\n" | jsonify }}
       })
       {{ if ne (add $index 1) $len -}}
         .add(

@@ -1,0 +1,20 @@
+{{ $meta := slice "content" "heading" "title" "preheading" }}
+
+{{ $content := "" }}
+
+{{ if and (in $meta .key) (eq "string" (printf "%T" .val)) }}
+    {{ $content = .val }}
+{{ else if or (reflect.IsMap .val) (reflect.IsSlice .val) }}
+    {{ range $child_key, $child_val := .val }}
+        {{ $new := partial "assets/search-meta.html" (dict "key" $child_key "val" $child_val) }}
+        {{ if gt (countrunes $new) 0 }}
+            {{ if gt (countrunes $content) 0 }}
+                {{ $content = delimit (slice $content $new) " " }}
+            {{ else }}
+                {{ $content = $new }}
+            {{ end }}
+        {{ end }}
+    {{ end }}
+{{ end}}
+
+{{ return $content }}

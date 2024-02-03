@@ -34,6 +34,15 @@
 
 Hinode is a clean blog theme for [Hugo][hugo], an open-source static site generator. Hinode is available as a [template][repository_template], and a [main theme][repository]. This repository maintains a Hugo module to add [FlexSearch][flexsearch] to a Hinode site. Visit the Hinode documentation site for [installation instructions][hinode_docs].
 
+## Configuration
+
+This module supports the following parameters (see the section `params.modules` in `config.toml`):
+
+| Setting                | Default  | Description |
+|------------------------|----------|-------------|
+| flexsearch.frontmatter | false    | If set, includes front matter in the page content. The search index function adds all parameters with the name `content`, `heading`, `title`, `preheading` recursively. |
+| flexsearch.filter      | "params" | Restricts the scanned frontmatter variables to the named filter. By default, all front matter variables are scanned. Only applicable when `flexsearch.frontmatter` is set. |
+
 <!-- MARKDOWN LINKS -->
 [flexsearch]: https://github.com/nextapps-de/flexsearch
 [hugo]: https://gohugo.io

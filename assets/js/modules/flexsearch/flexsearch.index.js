@@ -22,7 +22,7 @@ function initIndex() {
   // https://discourse.gohugo.io/t/range-length-or-last-element/3803/2
   // Note: uses .Site.AllPages as .Site.RegularPages only returns content for the current language;
   //       pages without a title (such as browserconfig.xml) are excluded
-  {{ $list := where (where site.AllPages "Kind" "in" "page") "Title" "!=" "" }}
+  {{ $list := where site.AllPages "Title" "!=" "" }}
   {{ $list = where $list ".Params.searchExclude" "!=" true }}
   {{ $len := (len $list) -}}
 
@@ -39,7 +39,14 @@ function initIndex() {
         {{ else -}}
           description: {{ .Summary | plainify | jsonify }},
         {{ end -}}
-        content: {{ (replaceRE "[{}]" "" .Plain) | jsonify }}
+        {{ $content := (replaceRE "[{}]" "" .Plain) }}
+        {{ if site.Params.modules.flexsearch.frontmatter }}
+          {{ $key := site.Params.modules.flexsearch.filter | default "params" }}
+          {{ $val := slice }}
+          {{ if ne $key "params" }}{{ $val = index .Params $key }}{{ else }}{{ $val = .Params }}{{ end }}
+          {{ $content = printf "%s %s" (partial "assets/search-meta.html" (dict "key" $key "val" $val)) $content }}
+        {{ end }}
+        content: {{ trim $content " \r\n" | jsonify }}
       })
       {{ if ne (add $index 1) $len -}}
         .add(

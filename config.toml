@@ -20,3 +20,7 @@
   [[module.mounts]]
     source = "static"
     target = "static"
+
+[params.modules.flexsearch]
+    frontmatter = false
+    filter = ""

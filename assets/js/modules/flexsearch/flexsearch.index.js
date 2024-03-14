@@ -29,10 +29,12 @@ function initIndex() {
   {{ if gt $len 0 }}
   index.add(
     {{ range $index, $element := sort $list "Title" "asc" -}}
+      {{ $url := .RelPermalink }}
+      {{ if site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end }}
       {
         id: {{ $index }},
         tag: "{{ .Lang }}",
-        href: "{{ .RelPermalink }}",
+        href: "{{ $url }}",
         title: {{ .Title | jsonify }},
         {{ with .Description -}}
           description: {{ . | jsonify }},

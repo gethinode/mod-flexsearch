@@ -1,0 +1,5 @@
+# Search
+- id: ui_search
+  translation: "Przeszukaj tę stronę"
+- id: ui_no_results
+  translation: "Brak wyników dla"

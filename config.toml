@@ -22,6 +22,7 @@
     target = "static"
 
 [params.modules.flexsearch]
+    integration = "core"
     canonifyURLs = false
     frontmatter = false
     filter = ""

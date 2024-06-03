@@ -38,7 +38,7 @@
     "cpy-cli": "^5.0.0",
     "hugo-bin": "^0.123.2",
     "rimraf": "^5.0.7",
-    "semantic-release": "^23.1.1"
+    "semantic-release": "^24.0.0"
   },
   "hugo-bin": {
     "buildTags": "extended"

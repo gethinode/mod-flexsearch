@@ -37,7 +37,7 @@
     "@semantic-release/git": "^10.0.1",
     "cpy-cli": "^5.0.0",
     "hugo-bin": "^0.125.2",
-    "rimraf": "^5.0.8",
+    "rimraf": "^6.0.0",
     "semantic-release": "^24.0.0"
   },
   "hugo-bin": {

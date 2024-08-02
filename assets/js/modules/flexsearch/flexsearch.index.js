@@ -20,9 +20,8 @@ Source:
 */
 function initIndex() {
   // https://discourse.gohugo.io/t/range-length-or-last-element/3803/2
-  // Note: uses .Site.AllPages as .Site.RegularPages only returns content for the current language;
-  //       pages without a title (such as browserconfig.xml) are excluded
-  {{ $list := where site.AllPages "Title" "!=" "" }}
+  // Note: pages without a title (such as browserconfig.xml) are excluded
+  {{ $list := where site.RegularPages "Title" "!=" "" }}
   {{ $list = where $list ".Params.searchExclude" "!=" true }}
   {{ $len := (len $list) -}}
 

@@ -26,3 +26,4 @@
     canonifyURLs = false
     frontmatter = false
     filter = ""
+    localize = true

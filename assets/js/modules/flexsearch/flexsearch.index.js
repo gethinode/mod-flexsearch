@@ -30,11 +30,13 @@ function initIndex() {
     {{ range $index, $element := sort $list "Title" "asc" -}}
       {{ $url := .RelPermalink }}
       {{ if site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end }}
+      {{ $title := .Title }}
+      {{ if site.Params.main.titleCase }}{{ $title = title $title }}{{ end }}
       {
         id: {{ $index }},
         tag: "{{ .Lang }}",
         href: "{{ $url }}",
-        title: {{ .Title | jsonify }},
+        title: {{ $title | jsonify }},
         {{ with .Description -}}
           description: {{ . | jsonify }},
         {{ else -}}

@@ -2,14 +2,34 @@ const search = document.querySelector('.search-input')
 const suggestions = document.querySelector('.search-suggestions')
 const background = document.querySelector('.search-background')
 
+const encoder = new FlexSearch.Encoder(FlexSearch.Charset.LatinSimple);
+encoder.assign({ minlength: 3 });
+
 var index = new FlexSearch.Document({
   tokenize: "forward",
   cache: 100,
   document: {
     id: "id",
-    tag: "tag",
     store: ["href", "title", "description"],
-    index: ["title", "description", "content"]
+    index: [
+      {
+        field: "title",
+        tokenize: "forward",
+        resolution: 3
+      },
+      {
+        field: "description",
+        encoder: encoder,
+        resolution: 20,
+        tokenize: "full"
+      },
+      {
+        field: "content",
+        encoder: encoder,
+        resolution: 20,
+        tokenize: "full"
+      }
+    ]
   }
 });
 
@@ -34,7 +54,6 @@ function initIndex() {
       {{ if site.Params.main.titleCase }}{{ $title = title $title }}{{ end }}
       {
         id: {{ $index }},
-        tag: "{{ .Lang }}",
         href: "{{ $url }}",
         title: {{ $title | jsonify }},
         {{ with .Description -}}
@@ -124,7 +143,7 @@ function showResults() {
   const lang = document.documentElement.lang;
   var results = null;
   if (searchQuery) {
-    results = index.search(searchQuery, { index: ['title', 'description', 'content'], limit: maxResult, tag: lang, enrich: true });
+    results = index.search(searchQuery, { index: ['title', 'description', 'content'], limit: maxResult, enrich: true });
     if (background !== null) {
       background.style.setProperty('--image-opacity', '0')
     }

@@ -42,11 +42,19 @@ This module uses [semantic-release][semantic-release] to automate the release of
 
 This module supports the following parameters (see the section `params.modules` in `config.toml`):
 
-| Setting                 | Default  | Description |
-|-------------------------|----------|-------------|
-| flexsearch.canonifyURLs | false    | If set, uses absolute URLs for the indexed pages instead of relative URLs. |
-| flexsearch.frontmatter  | false    | If set, includes front matter in the page content. The search index function adds all parameters with the name `content`, `heading`, `title`, `preheading` recursively. |
-| flexsearch.filter       | "params" | Restricts the scanned frontmatter variables to the named filter. By default, all front matter variables are scanned. Only applicable when `flexsearch.frontmatter` is set. |
+| Setting                   | Default  | Description |
+|---------------------------|----------|-------------|
+| `flexsearch.canonifyURLs` | false    | If set, uses absolute URLs for the indexed pages instead of relative URLs. |
+| `flexsearch.frontmatter`  | false    | If set, includes front matter in the page content. The search index function adds all parameters with the name `content`, `heading`, `title`, `preheading` recursively. |
+| `flexsearch.filter`       | "params" | Restricts the scanned frontmatter variables to the named filter. By default, all front matter variables are scanned. Only applicable when `flexsearch.frontmatter` is set. |
+
+In addition, the module recognizes the following site parameters (see the section `params.navigation` in `config.toml`):.
+
+| Setting          | Default  | Description |
+|------------------|-----------|-------------|
+| `search.enabled` | false                  | If set, enables search in the site's main navigation. |
+| `search.modal`   | false                  | If set, uses a modal form for search queries. Defaults to an embedded input field. |
+| `search.icon`    | `fas magnifying-glass` | Defines the icon used in the site's main navigation. Only applicable to `modal` search. |
 
 <!-- MARKDOWN LINKS -->
 [conventionalcommits]: https://www.conventionalcommits.org

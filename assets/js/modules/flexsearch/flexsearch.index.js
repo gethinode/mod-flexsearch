@@ -50,7 +50,10 @@ function initIndex() {
     {{ range $index, $element := sort $list "Title" "asc" -}}
       {{ $url := .RelPermalink }}
       {{ if site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end }}
-      {{ $title := .Title }}
+      {{ $title := .LinkTitle | default .Title }}
+      {{ if gt (strings.RuneCount $title) 33 }}
+          {{ $title = print (substr $title 0 30) "..." }}
+      {{ end }}
       {{ if site.Params.main.titleCase }}{{ $title = title $title }}{{ end }}
       {
         id: {{ $index }},

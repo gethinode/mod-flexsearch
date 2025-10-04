@@ -1,5 +1,6 @@
 ---
 title: Fourth page
+linkTitle: Fourth
 description: Fourth example page, no page content.
 date: 2024-02-03
 searchExclude: false

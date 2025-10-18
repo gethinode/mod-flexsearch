@@ -1,0 +1,12 @@
+{{ .EnableAllLanguages }}
+{{ $content := dict
+  "mediaType" "text/markdown"
+  "value"     "{{< ModalSearch >}}"
+}}
+{{ $page := dict
+  "content" $content
+  "kind"    "page"
+  "path"    "search"
+  "title"   "Modal search"
+}}
+{{ .AddPage $page }}

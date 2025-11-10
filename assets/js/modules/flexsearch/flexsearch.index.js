@@ -54,7 +54,7 @@ function initIndex() {
       {{ if gt (strings.RuneCount $title) 33 }}
           {{ $title = print (substr $title 0 30) "..." }}
       {{ end }}
-      {{ if site.Params.main.titleCase }}{{ $title = title $title }}{{ end }}
+      {{ if and site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end }}
       {
         id: {{ $index }},
         href: "{{ $url }}",

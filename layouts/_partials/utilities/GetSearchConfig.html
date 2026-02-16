@@ -1,4 +1,3 @@
-{{- $searchArg := .search | default false -}}
 {{- $searchDefault := false -}}
 {{- $searchModal := false -}}
 {{- $searchIcon := "fas magnifying-glass" }}
@@ -11,7 +10,10 @@
     {{- $searchModal = site.Params.navigation.search.modal -}}
     {{- $searchIcon = site.Params.navigation.search.icon | default $searchIcon }}
 {{ end }}
-{{- $search := $searchArg | default $searchDefault -}}
+{{- $search := $searchDefault -}}
+{{- if isset . "search" -}}
+    {{- $search = .search -}}
+{{- end -}}
 {{- $searchModal = and $search $searchModal -}}
 {{ if isset site.Params.navigation "searchmodal" }}
     {{ warnf "site parameter %q: deprecated in v%s, use %q instead" "navigation.searchModal" "1.12.0" "navigation.search.modal" }}

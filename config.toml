@@ -24,10 +24,12 @@
     source = "static"
     target = "static"
 
+[params.icons]
+    search = "fas magnifying-glass"
+
 [params.navigation.search]
     enabled = true
     modal = true
-    icon = "fas magnifying-glass"
 
 [params.modules.flexsearch]
     integration = "core"

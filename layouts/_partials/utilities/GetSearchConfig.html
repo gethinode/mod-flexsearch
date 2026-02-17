@@ -8,19 +8,15 @@
 {{ else }}
     {{- $searchDefault = site.Params.navigation.search.enabled -}}
     {{- $searchModal = site.Params.navigation.search.modal -}}
-    {{- if not $searchIcon -}}
-        {{- with site.Params.navigation.search.icon -}}
-            {{- $searchIcon = . -}}
-            {{- partial "utilities/LogWarn.html" (dict
-                "partial" "utilities/GetSearchConfig.html"
-                "warnid"  "warn-deprecated-icons"
-                "msg"     "Deprecated icon params detected; migrate to the [icons] section in params.toml"
-                "details" (slice "Replace 'navigation.search.icon' with 'icons.search'")
-            ) -}}
-        {{- else -}}
-            {{- $searchIcon = "fas magnifying-glass" -}}
-        {{- end -}}
+    {{- with site.Params.navigation.search.icon -}}
+        {{- partial "utilities/LogWarn.html" (dict
+            "partial" "utilities/GetSearchConfig.html"
+            "warnid"  "warn-deprecated-icons"
+            "msg"     "Deprecated icon params detected; migrate to the [icons] section in params.toml"
+            "details" (slice "Replace 'navigation.search.icon' with 'icons.search'")
+        ) -}}
     {{- end -}}
+    {{- $searchIcon = or $searchIcon site.Params.navigation.search.icon | default "fas magnifying-glass" -}}
 {{ end }}
 {{- $search := $searchDefault -}}
 {{- if isset . "search" -}}

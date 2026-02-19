@@ -1,6 +1,6 @@
 {{- $searchDefault := false -}}
 {{- $searchModal := false -}}
-{{- $searchIcon := site.Params.icons.search -}}
+{{- $searchIcon := partial "utilities/GetThemeIcon.html" (dict "id" "searchIcon" "default" "fas magnifying-glass") -}}
 {{ if eq (printf "%T" site.Params.navigation.search) "bool" }}
     {{- $searchDefault = site.Params.navigation.search -}}
     {{- $searchModal = site.Params.navigation.searchModal -}}
@@ -16,7 +16,7 @@
             "details" (slice "Replace 'navigation.search.icon' with 'icons.search'")
         ) -}}
     {{- end -}}
-    {{- $searchIcon = or $searchIcon site.Params.navigation.search.icon | default "fas magnifying-glass" -}}
+    {{- $searchIcon = or $searchIcon site.Params.navigation.search.icon -}}
 {{ end }}
 {{- $search := $searchDefault -}}
 {{- if isset . "search" -}}

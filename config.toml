@@ -4,6 +4,8 @@
     min = "0.146.0"
     max = ""
   [[module.imports]]
+    path = "github.com/gethinode/mod-utils/v5"
+  [[module.imports]]
     path = "github.com/nextapps-de/flexsearch"
   [[module.imports.mounts]]
     source = "dist/flexsearch.bundle.min.js"

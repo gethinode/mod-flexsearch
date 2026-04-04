@@ -3,3 +3,5 @@
   translation: "Zoeken op deze site"
 - id: ui_no_results
   translation: "Geen resultaten voor"
+- id: close
+  translation: "Sluiten"

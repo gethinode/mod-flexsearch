@@ -3,3 +3,5 @@
   translation: "Rechercher"
 - id: ui_no_results
   translation: "Aucun résultat pour"
+- id: close
+  translation: "Fermer"

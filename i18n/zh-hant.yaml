@@ -3,3 +3,5 @@
   translation: "搜尋本站"
 - id: ui_no_results
   translation: "沒有結果"
+- id: close
+  translation: "關閉"

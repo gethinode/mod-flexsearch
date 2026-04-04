@@ -3,3 +3,5 @@
   translation: "Durchsuche diese Seite"
 - id: ui_no_results
   translation: "Keine Ergebnisse für"
+- id: close
+  translation: "Schließen"

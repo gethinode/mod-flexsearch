@@ -41,7 +41,7 @@ Source:
 function initIndex() {
   // https://discourse.gohugo.io/t/range-length-or-last-element/3803/2
   // Note: pages without a title (such as browserconfig.xml) are excluded
-  {{ $sections := where site.Sections "Title" "!=" "" }}
+  {{ $sections := where (where site.Pages "Kind" "section") "Title" "!=" "" }}
   {{ $list := where site.RegularPages "Title" "!=" "" | append $sections }}
   {{ $list = where $list ".Params.searchExclude" "!=" true }}
   {{ $len := (len $list) -}}

@@ -55,7 +55,12 @@ function initIndex() {
           {{ $title = print (substr $title 0 30) "..." }}
       {{ end }}
       {{ if and site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end }}
-      {{ $content := replaceRE "[{}]" "" .Plain }}
+      {{ $content := "" }}
+      {{ if site.Params.modules.flexsearch.summaryOnly -}}
+        {{ $content = replaceRE "[{}]" "" (.Summary | plainify) }}
+      {{- else -}}
+        {{ $content = replaceRE "[{}]" "" .Plain }}
+      {{- end }}
       {{ if site.Params.modules.flexsearch.frontmatter }}
         {{ $key := site.Params.modules.flexsearch.filter | default "params" }}
         {{ $val := slice }}

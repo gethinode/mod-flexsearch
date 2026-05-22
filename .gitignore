@@ -8,3 +8,4 @@ exampleSite/resources
 .DS_store
 .hugo_build.lock
 hugo_stats.json
+.claude/settings.json

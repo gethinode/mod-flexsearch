@@ -57,9 +57,12 @@ The module imports `github.com/nextapps-de/flexsearch` and mounts its bundle to 
 - The JavaScript file generates a FlexSearch document index at build time from Hugo's page content
 - Indexes three fields: `title` (forward tokenization), `description`, and `content` (full tokenization)
 - Supports optional frontmatter indexing via `flexsearch.frontmatter` parameter
+- Can index page summaries instead of full content via `flexsearch.summaryOnly` parameter
 - Can use absolute URLs via `flexsearch.canonifyURLs` parameter
 - Pages can be excluded with `searchExclude: true` in frontmatter
 - Supports optional `indexTitle` parameter to override title in search results
+- Each indexed page is emitted as a separate `index.add(...)` statement (a chained
+  `.add()` expression overflows the minifier's expression-nesting limit on large sites)
 
 **Search behavior:**
 - Shows up to 5 results across title, description, and content fields
@@ -81,6 +84,7 @@ Module configuration in `config.toml` under `params.modules.flexsearch`:
 - `canonifyURLs` (default: false): Use absolute URLs instead of relative
 - `frontmatter` (default: false): Include frontmatter content in search index
 - `filter` (default: "params"): Restrict frontmatter scanning to specific key
+- `summaryOnly` (default: false): Index page summaries instead of full content
 - `localize` (default: true): Enable language-specific search
 
 Navigation configuration under `params.navigation.search`:

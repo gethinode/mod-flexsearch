@@ -38,4 +38,5 @@
     canonifyURLs = false
     frontmatter = false
     filter = ""
+    summaryOnly = false
     localize = true

@@ -47,7 +47,6 @@ function initIndex() {
   {{ $len := (len $list) -}}
 
   {{ if gt $len 0 }}
-  index.add(
     {{ range $index, $element := sort $list "Title" "asc" -}}
       {{ $url := .RelPermalink }}
       {{ if site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end }}
@@ -56,29 +55,25 @@ function initIndex() {
           {{ $title = print (substr $title 0 30) "..." }}
       {{ end }}
       {{ if and site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end }}
-      {
-        id: {{ $index }},
-        href: "{{ $url }}",
-        title: {{ $title | jsonify }},
-        {{ with .Description -}}
-          description: {{ . | jsonify }},
-        {{ else -}}
-          description: {{ .Summary | plainify | jsonify }},
-        {{ end -}}
-        {{ $content := (replaceRE "[{}]" "" .Plain) }}
-        {{ if site.Params.modules.flexsearch.frontmatter }}
-          {{ $key := site.Params.modules.flexsearch.filter | default "params" }}
-          {{ $val := slice }}
-          {{ if ne $key "params" }}{{ $val = index .Params $key }}{{ else }}{{ $val = .Params }}{{ end }}
-          {{ $content = printf "%s %s" (partial "assets/search-meta.html" (dict "key" $key "val" $val)) $content }}
-        {{ end }}
-        content: {{ trim $content " \r\n" | jsonify }}
-      })
-      {{ if ne (add $index 1) $len -}}
-        .add(
-      {{ end -}}
+      {{ $content := replaceRE "[{}]" "" .Plain }}
+      {{ if site.Params.modules.flexsearch.frontmatter }}
+        {{ $key := site.Params.modules.flexsearch.filter | default "params" }}
+        {{ $val := slice }}
+        {{ if ne $key "params" }}{{ $val = index .Params $key }}{{ else }}{{ $val = .Params }}{{ end }}
+        {{ $content = printf "%s %s" (partial "assets/search-meta.html" (dict "key" $key "val" $val)) $content }}
+      {{ end }}
+  index.add({
+    id: {{ $index }},
+    href: "{{ $url }}",
+    title: {{ $title | jsonify }},
+    {{ with .Description -}}
+    description: {{ . | jsonify }},
+    {{- else -}}
+    description: {{ .Summary | plainify | jsonify }},
+    {{- end }}
+    content: {{ trim $content " \r\n" | jsonify }}
+  });
     {{ end -}}
-  ;
   {{ end }}
 
   search.addEventListener('input', showResults, true);

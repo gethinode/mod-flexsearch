@@ -1,0 +1,10 @@
+{{- /*
+    Returns the URL of the per-language search index — the `searchindex` output
+    format rendered on the home page. Consumed by the search input layouts to
+    populate the data-search-index attribute the lazy runtime fetches.
+*/ -}}
+{{- $url := "" -}}
+{{- with site.Home.OutputFormats.Get "searchindex" -}}
+    {{- $url = .RelPermalink -}}
+{{- end -}}
+{{- return $url -}}

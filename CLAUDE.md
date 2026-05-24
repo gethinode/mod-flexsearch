@@ -51,18 +51,26 @@ The module imports `github.com/nextapps-de/flexsearch` and mounts its bundle to 
 - `layouts/_partials/assets/search-input.html`: Embedded search form HTML structure
 - `layouts/_shortcodes/ModalSearch.html`: Modal search dialog structure
 - `layouts/_partials/assets/search-meta.html`: Recursive helper to extract frontmatter content for indexing
+- `layouts/_partials/utilities/GetSearchDocs.html`: Single source of truth — builds the slice of index documents (consumed by both the eager JS and the lazy JSON output)
+- `layouts/index.searchindex.json`: Layout for the `searchindex` output format — emits the index documents as JSON on the home page (lazy mode)
+- `layouts/_partials/utilities/GetSearchIndex.html`: Returns the URL of the search-index output (lazy mode)
 - `assets/js/modules/flexsearch/flexsearch.index.js`: FlexSearch initialization and search logic
 
 **Search index configuration:**
-- The JavaScript file generates a FlexSearch document index at build time from Hugo's page content
+- The index documents are built by `GetSearchDocs.html` from Hugo's page content
 - Indexes three fields: `title` (forward tokenization), `description`, and `content` (full tokenization)
 - Supports optional frontmatter indexing via `flexsearch.frontmatter` parameter
 - Can index page summaries instead of full content via `flexsearch.summaryOnly` parameter
 - Can use absolute URLs via `flexsearch.canonifyURLs` parameter
 - Pages can be excluded with `searchExclude: true` in frontmatter
 - Supports optional `indexTitle` parameter to override title in search results
-- Each indexed page is emitted as a separate `index.add(...)` statement (a chained
-  `.add()` expression overflows the minifier's expression-nesting limit on large sites)
+- **Eager mode (default):** `flexsearch.index.js` emits one flat `index.add(...)`
+  statement per page into the core bundle (a chained `.add()` expression
+  overflows the minifier's expression-nesting limit on large sites)
+- **Lazy mode (`flexsearch.lazyLoad`):** the index is emitted as a separate
+  per-language JSON file via the `searchindex` output format and fetched on
+  the first search interaction (a normal page render, so page content can be
+  aggregated safely — unlike a detached resource template)
 
 **Search behavior:**
 - Shows up to 5 results across title, description, and content fields
@@ -85,6 +93,7 @@ Module configuration in `config.toml` under `params.modules.flexsearch`:
 - `frontmatter` (default: false): Include frontmatter content in search index
 - `filter` (default: "params"): Restrict frontmatter scanning to specific key
 - `summaryOnly` (default: false): Index page summaries instead of full content
+- `lazyLoad` (default: false): Emit the index as a separate JSON file fetched on first search interaction, instead of bundling it into every page
 - `localize` (default: true): Enable language-specific search
 
 Navigation configuration under `params.navigation.search`:

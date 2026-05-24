@@ -48,6 +48,13 @@ This module supports the following parameters (see the section `params.modules` 
 | `flexsearch.frontmatter`  | false    | If set, includes front matter in the page content. The search index function adds all parameters with the name `content`, `heading`, `title`, `preheading` recursively. |
 | `flexsearch.filter`       | "params" | Restricts the scanned frontmatter variables to the named filter. By default, all front matter variables are scanned. Only applicable when `flexsearch.frontmatter` is set. |
 | `flexsearch.summaryOnly`  | false    | If set, indexes each page's summary instead of its full content. Reduces the size of the generated search index considerably on large sites, at the cost of matching only summary text. |
+| `flexsearch.lazyLoad`     | false    | If set, the search index is emitted as a separate per-language JSON file and fetched on the visitor's first search interaction, instead of being bundled into the core script loaded on every page. See the note below on Content Security Policy. |
+
+> [!NOTE]
+> With `flexsearch.lazyLoad` enabled the search index is fetched at runtime. A
+> site that sets a strict Content Security Policy must allow `connect-src 'self'`.
+> The module declares this directive in its `csp` block, so sites using the
+> Hinode CSP module pick it up automatically.
 
 In addition, the module recognizes the following site parameters (see the section `params.navigation` in `config.toml`):.
 

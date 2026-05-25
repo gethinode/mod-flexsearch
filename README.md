@@ -58,11 +58,19 @@ This module supports the following parameters (see the section `params.modules` 
 
 In addition, the module recognizes the following site parameters (see the section `params.navigation` in `config.toml`):.
 
-| Setting          | Default  | Description |
-|------------------|-----------|-------------|
-| `search.enabled` | false                  | If set, enables search in the site's main navigation. |
-| `search.modal`   | false                  | If set, uses a modal form for search queries. Defaults to an embedded input field. |
-| `search.icon`    | `fas magnifying-glass` | Defines the icon used in the site's main navigation. Only applicable to `modal` search. |
+| Setting          | Default | Description |
+|------------------|---------|-------------|
+| `search.enabled` | false   | If set, enables search in the site's main navigation. |
+| `search.modal`   | false   | If set, uses a modal form for search queries. Defaults to an embedded input field. |
+
+The icon used by modal search is read from the central `[icons]` section in `params.toml`:
+
+| Setting         | Default                | Description |
+|-----------------|------------------------|-------------|
+| `icons.search`  | `fas magnifying-glass` | Defines the icon used in the site's main navigation. Only applicable to `modal` search. |
+
+> [!NOTE]
+> The legacy `navigation.search.icon` parameter was deprecated in v3.3.0 in favour of `icons.search`. It still works but emits a deprecation warning; migrate any existing configuration to the `[icons]` section.
 
 <!-- MARKDOWN LINKS -->
 [conventionalcommits]: https://www.conventionalcommits.org

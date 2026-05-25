@@ -1,0 +1,45 @@
+{{- /*
+    Builds the list of documents for the FlexSearch index. Returns a slice of
+    dicts with the keys: id, href, title, description, content.
+
+    This is the single source of truth for index documents — it is consumed
+    both by the eager path (flexsearch.index.js, inline index.add() calls) and
+    the lazy path (flexsearch-index-data.json, fetched on demand).
+
+    Honors the params.modules.flexsearch settings: canonifyURLs, summaryOnly,
+    frontmatter, filter. Pages without a title and pages with searchExclude
+    are omitted.
+*/ -}}
+{{- $sections := where (where site.Pages "Kind" "section") "Title" "!=" "" -}}
+{{- $list := where site.RegularPages "Title" "!=" "" | append $sections -}}
+{{- $list = where $list ".Params.searchExclude" "!=" true -}}
+{{- $docs := slice -}}
+{{- range $index, $element := sort $list "Title" "asc" -}}
+    {{- $url := .RelPermalink -}}
+    {{- if site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end -}}
+    {{- $title := or .Params.indexTitle .LinkTitle .Title -}}
+    {{- if gt (strings.RuneCount $title) 33 }}{{ $title = print (substr $title 0 30) "..." }}{{ end -}}
+    {{- if and site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end -}}
+    {{- $description := "" -}}
+    {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = $element.Summary | plainify }}{{ end -}}
+    {{- $content := "" -}}
+    {{- if site.Params.modules.flexsearch.summaryOnly -}}
+        {{- $content = replaceRE "[{}]" "" (.Summary | plainify) -}}
+    {{- else -}}
+        {{- $content = replaceRE "[{}]" "" .Plain -}}
+    {{- end -}}
+    {{- if site.Params.modules.flexsearch.frontmatter -}}
+        {{- $key := site.Params.modules.flexsearch.filter | default "params" -}}
+        {{- $val := slice -}}
+        {{- if ne $key "params" }}{{ $val = index .Params $key }}{{ else }}{{ $val = .Params }}{{ end -}}
+        {{- $content = printf "%s %s" (partial "assets/search-meta.html" (dict "key" $key "val" $val)) $content -}}
+    {{- end -}}
+    {{- $docs = $docs | append (dict
+        "id" $index
+        "href" $url
+        "title" $title
+        "description" $description
+        "content" (trim $content " \r\n")
+    ) -}}
+{{- end -}}
+{{- return $docs -}}

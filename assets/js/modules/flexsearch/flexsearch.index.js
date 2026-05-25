@@ -1,3 +1,4 @@
+{{- $lazy := site.Params.modules.flexsearch.lazyLoad | default false -}}
 const search = document.querySelector('.search-input')
 const suggestions = document.querySelector('.search-suggestions')
 const background = document.querySelector('.search-background')
@@ -33,57 +34,57 @@ var index = new FlexSearch.Document({
   }
 });
 
+{{ if $lazy -}}
+/*
+  Lazy mode: the index data is fetched from a standalone JSON resource the
+  first time the user interacts with search, instead of being bundled into
+  every page. The data URL is read from the search input's data-search-index
+  attribute (set by the search-input / ModalSearch layouts).
+*/
+let indexStatus = 'idle'; // idle | loading | ready | error
+
+function loadIndex() {
+  if (indexStatus !== 'idle') return;
+  indexStatus = 'loading';
+
+  const url = search.dataset.searchIndex;
+  if (!url) {
+    indexStatus = 'error';
+    console.error('flexsearch: missing data-search-index URL on the search input');
+    return;
+  }
+
+  fetch(url)
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    })
+    .then((docs) => {
+      for (const doc of docs) index.add(doc);
+      indexStatus = 'ready';
+      search.addEventListener('input', showResults, true);
+      // Honor a query typed while the index was still loading.
+      if (search.value) showResults.call(search);
+    })
+    .catch((err) => {
+      indexStatus = 'error';
+      console.error('flexsearch: failed to load search index', err);
+    });
+}
+{{- else -}}
 /*
 Source:
   - https://github.com/nextapps-de/flexsearch#index-documents-field-search
   - https://raw.githack.com/nextapps-de/flexsearch/master/demo/autocomplete.html
 */
 function initIndex() {
-  // https://discourse.gohugo.io/t/range-length-or-last-element/3803/2
-  // Note: pages without a title (such as browserconfig.xml) are excluded
-  {{ $sections := where (where site.Pages "Kind" "section") "Title" "!=" "" }}
-  {{ $list := where site.RegularPages "Title" "!=" "" | append $sections }}
-  {{ $list = where $list ".Params.searchExclude" "!=" true }}
-  {{ $len := (len $list) -}}
-
-  {{ if gt $len 0 }}
-    {{ range $index, $element := sort $list "Title" "asc" -}}
-      {{ $url := .RelPermalink }}
-      {{ if site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end }}
-      {{ $title := or .Params.indexTitle .LinkTitle .Title }}
-      {{ if gt (strings.RuneCount $title) 33 }}
-          {{ $title = print (substr $title 0 30) "..." }}
-      {{ end }}
-      {{ if and site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end }}
-      {{ $content := "" }}
-      {{ if site.Params.modules.flexsearch.summaryOnly -}}
-        {{ $content = replaceRE "[{}]" "" (.Summary | plainify) }}
-      {{- else -}}
-        {{ $content = replaceRE "[{}]" "" .Plain }}
-      {{- end }}
-      {{ if site.Params.modules.flexsearch.frontmatter }}
-        {{ $key := site.Params.modules.flexsearch.filter | default "params" }}
-        {{ $val := slice }}
-        {{ if ne $key "params" }}{{ $val = index .Params $key }}{{ else }}{{ $val = .Params }}{{ end }}
-        {{ $content = printf "%s %s" (partial "assets/search-meta.html" (dict "key" $key "val" $val)) $content }}
-      {{ end }}
-  index.add({
-    id: {{ $index }},
-    href: "{{ $url }}",
-    title: {{ $title | jsonify }},
-    {{ with .Description -}}
-    description: {{ . | jsonify }},
-    {{- else -}}
-    description: {{ .Summary | plainify | jsonify }},
-    {{- end }}
-    content: {{ trim $content " \r\n" | jsonify }}
-  });
-    {{ end -}}
-  {{ end }}
-
+  {{- range $doc := partial "utilities/GetSearchDocs.html" . }}
+  index.add({{ $doc | jsonify }});
+  {{- end }}
   search.addEventListener('input', showResults, true);
 }
-  
+{{- end }}
+
 function hideSuggestions(e) {
   var isClickInsideElement = suggestions.contains(e.target);
 
@@ -134,7 +135,7 @@ function suggestionFocus(e) {
     focusableSuggestions[nextIndex].focus();
   }
 }
-  
+
 /*
 Source:
   - https://github.com/nextapps-de/flexsearch#index-documents-field-search
@@ -168,7 +169,7 @@ function showResults() {
 
   suggestions.innerHTML = "";
   suggestions.classList.remove('d-none');
-  
+
   // inform user that no results were found
   if (flatResults.size === 0 && searchQuery) {
     const msg = suggestions.dataset.noResults;
@@ -204,17 +205,24 @@ function showResults() {
     if (suggestions.childElementCount == maxResult) break;
   }
 }
-  
+
 if (search !== null && suggestions !== null) {
   document.addEventListener('keydown', inputFocus);
-  document.addEventListener('keydown', suggestionFocus);  
+  document.addEventListener('keydown', suggestionFocus);
   document.addEventListener('click', hideSuggestions);
+  {{ if $lazy -}}
+  search.addEventListener('focus', loadIndex, { once: true });
+  search.addEventListener('click', loadIndex, { once: true });
+  {{- else -}}
   initIndex();
+  {{- end }}
 }
 
 const searchModal = document.getElementById('search-modal')
 if (searchModal !== null) {
   searchModal.addEventListener('shown.bs.modal', function () {
+    {{ if $lazy }}loadIndex();
+    {{ end -}}
     const searchInput = document.getElementById('search-input-modal')
     if (searchInput !== null) {
       searchInput.focus({ focusVisible: true })

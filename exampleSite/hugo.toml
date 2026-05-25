@@ -2,6 +2,12 @@ baseURL = 'http://example.org/'
 languageCode = 'en-us'
 title = 'Test site for mod-flexsearch'
 
+[params.modules.flexsearch]
+  lazyLoad = true
+
+[outputs]
+  home = ["HTML", "RSS", "searchindex"]
+
 [module]
   replacements = 'github.com/gethinode/mod-flexsearch/v4 -> ../..'
   [[module.mounts]]

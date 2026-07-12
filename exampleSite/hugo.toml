@@ -9,7 +9,7 @@ title = 'Test site for mod-flexsearch'
   home = ["HTML", "RSS", "searchindex"]
 
 [module]
-  replacements = 'github.com/gethinode/mod-flexsearch/v4 -> ../..'
+  replacements = 'github.com/gethinode/mod-flexsearch/v5 -> ../..'
   [[module.mounts]]
     source = "assets"
     target = "assets"
@@ -23,9 +23,9 @@ title = 'Test site for mod-flexsearch'
     source = "static"
     target = "static"
   [[module.imports]]
-    path = "github.com/gethinode/mod-utils/v5"
+    path = "github.com/gethinode/mod-utils/v6"
   [[module.imports]]
-    path = "github.com/gethinode/mod-flexsearch/v4"
+    path = "github.com/gethinode/mod-flexsearch/v5"
   [[module.imports.mounts]]
     source = "assets"
     target = "assets"

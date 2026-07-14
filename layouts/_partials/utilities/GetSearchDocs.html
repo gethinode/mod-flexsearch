@@ -4,7 +4,7 @@
 
     This is the single source of truth for index documents — it is consumed
     both by the eager path (flexsearch.index.js, inline index.add() calls) and
-    the lazy path (flexsearch-index-data.json, fetched on demand).
+    the lazy path (flexsearch-index.json, fetched on demand).
 
     Honors the params.modules.flexsearch settings: canonifyURLs, summaryOnly,
     frontmatter, filter. Pages without a title and pages with searchExclude
@@ -21,7 +21,26 @@
     {{- if gt (strings.RuneCount $title) 33 }}{{ $title = print (substr $title 0 30) "..." }}{{ end -}}
     {{- if and site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end -}}
     {{- $description := "" -}}
-    {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = $element.Summary | plainify }}{{ end -}}
+    {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = $element.Summary }}{{ end -}}
+    {{/*
+        Both htmlUnescape calls below are load-bearing; neither may be dropped:
+        - the first (before the whitespace collapse) decodes source entities, so e.g.
+          `&nbsp;` becomes a real U+00A0 that the collapse below can then absorb —
+          without it, `&nbsp;` survives as six literal characters and eats into the
+          100-char budget;
+        - the second (after truncate) undoes the HTML-escaping that Hugo's `truncate`
+          applies to plain-string input (it returns template.HTML), which would
+          otherwise corrupt apostrophes, ampersands and quotes into visible entities.
+
+        The collapse regex [\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+ is
+        deliberately wider than Go's `\s` (ASCII-only): \p{Zs} adds the Unicode
+        space-separator category (including NBSP), \p{Zl}/\p{Zp} add the line and
+        paragraph separators U+2028/U+2029, and \x{000B}/\x{0085}/\x{FEFF} add vertical
+        tab, next line, and zero-width no-break space — matching what the JS assertion
+        in scripts/check-search-index.mjs flags as uncollapsed whitespace.
+    */ -}}
+    {{- $description = $description | plainify | htmlUnescape -}}
+    {{- $description = trim (replaceRE `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` " " $description) " " | truncate 100 "..." | htmlUnescape -}}
     {{- $content := "" -}}
     {{- if site.Params.modules.flexsearch.summaryOnly -}}
         {{- $content = replaceRE "[{}]" "" (.Summary | plainify) -}}

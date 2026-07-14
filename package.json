@@ -21,7 +21,7 @@
     "mod:tidy": "hugo mod tidy && hugo mod tidy -s exampleSite",
     "mod:update": "pnpm mod:tidy && hugo mod get -u",
     "mod:vendor": "rimraf _vendor && hugo mod vendor",
-    "test": "pnpm build",
+    "test": "pnpm build && node scripts/check-search-index.mjs",
     "prepare": "node .husky/install.mjs"
   },
   "repository": {

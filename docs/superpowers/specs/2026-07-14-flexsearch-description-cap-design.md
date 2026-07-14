@@ -60,7 +60,7 @@ One partial changes: `layouts/_partials/utilities/GetSearchDocs.html`, lines 23-
 {{- $description := "" -}}
 {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = $element.Summary }}{{ end -}}
 {{- $description = $description | plainify | htmlUnescape -}}
-{{- $description = trim (replaceRE `[\s\x{00A0}]+` " " $description) " " | truncate 100 "..." -}}
+{{- $description = trim (replaceRE `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` " " $description) " " | truncate 100 "..." | htmlUnescape -}}
 ```
 
 Sourcing is separated from normalizing, so a frontmatter description and a summary
@@ -71,9 +71,10 @@ fallback receive identical treatment.
 | Step | Purpose |
 |------|---------|
 | `plainify` | Strips HTML tags. Already present today. |
-| `htmlUnescape` | Decodes the entities `plainify` leaves behind. This is what removes the literal `&nbsp;`. |
-| `replaceRE` + `trim` | Collapses newlines and space runs injected by table markup. Must run **before** truncation, or the 100-character budget is spent on whitespace. The character class names `\x{00A0}` explicitly because Go's `\s` is ASCII-only and would otherwise leave behind the non-breaking spaces `htmlUnescape` just produced. |
+| `htmlUnescape` (first) | Decodes source entities, so e.g. `&nbsp;` becomes a real U+00A0 that the whitespace collapse below can then absorb. Without it, `&nbsp;` survives as six literal characters and eats into the 100-character budget. |
+| `replaceRE` + `trim` | Collapses newlines and space runs injected by table markup. Must run **before** truncation, or the 100-character budget is spent on whitespace. The character class `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` is wider than Go's ASCII-only `\s`: `\p{Zs}` adds the Unicode space-separator category (including NBSP), `\p{Zl}`/`\p{Zp}` add the line/paragraph separators U+2028/U+2029, and the explicit code points add vertical tab, next line, and zero-width no-break space. |
 | `truncate 100 "..."` | Hugo's word-boundary-aware truncation. The ellipsis is appended only when the string is actually cut, so a short description passes through untouched. |
+| `htmlUnescape` (second) | Undoes the HTML-escaping that `truncate` applies to its plain-string input (`truncate` returns `template.HTML`). Without this second call, a truncated description that contains an apostrophe, ampersand, or quote comes out with visible entities like `&#39;` instead of the original character. |
 
 ### Cap length
 

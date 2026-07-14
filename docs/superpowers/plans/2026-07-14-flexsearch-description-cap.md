@@ -197,16 +197,17 @@ with these three lines:
 ```hugo
     {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = $element.Summary }}{{ end -}}
     {{- $description = $description | plainify | htmlUnescape -}}
-    {{- $description = trim (replaceRE `[\s\x{00A0}]+` " " $description) " " | truncate 100 "..." -}}
+    {{- $description = trim (replaceRE `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` " " $description) " " | truncate 100 "..." | htmlUnescape -}}
 ```
 
 Leave line 23 (`{{- $description := "" -}}`) exactly as it is.
 
 Each step earns its place, so do not "simplify" any of them away:
 - `plainify` strips tags (this was already there).
-- `htmlUnescape` decodes the entities `plainify` leaves behind — this is what removes the literal `&nbsp;`.
-- `replaceRE` + `trim` collapse whitespace, and **must run before** `truncate`, or the 100-character budget gets spent on whitespace. The character class names `\x{00A0}` explicitly because Go's `\s` is ASCII-only and would otherwise leave behind the non-breaking space that `htmlUnescape` just produced.
+- `htmlUnescape` (first) decodes the entities `plainify` leaves behind — this is what turns a literal `&nbsp;` into a real U+00A0, which the whitespace collapse below can then absorb.
+- `replaceRE` + `trim` collapse whitespace, and **must run before** `truncate`, or the 100-character budget gets spent on whitespace. The character class `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` names the Unicode space/line/paragraph-separator categories and a few extra control/format code points explicitly, because Go's `\s` is ASCII-only and would otherwise leave them uncollapsed.
 - `truncate` is word-boundary aware and appends the ellipsis only when it actually cuts, so short descriptions pass through untouched.
+- `htmlUnescape` (second, after `truncate`) undoes the HTML-escaping that `truncate` applies to its plain-string input — without it, a truncated description containing an apostrophe, ampersand, or quote comes out with visible entities like `&#39;` instead of the original character.
 
 - [ ] **Step 7: Run the test to verify it PASSES**
 
@@ -295,15 +296,20 @@ export PATH="$PWD/node_modules/.bin:$PATH"
 hugo config mounts -s exampleSite | grep -i flexsearch | head -3
 ```
 
-Expected: paths pointing into `mod-flexsearch.worktrees/cap-search-description`, **not** into `_vendor/`. If they still point at `_vendor/`, stop and fix the replacement — everything downstream would be a vacuous pass.
+Expected: paths pointing into `mod-flexsearch.worktrees/cap-search-description`, **not** into `_vendor/`.
+
+**This gate is necessary but NOT sufficient** (learned during execution): `hugo config mounts` can report the replacement while the actual *build* still resolves the module from Hinode's committed `_vendor/` copy. The only reliable check is the measured result in Step 4. See Step 3.
 
 - [ ] **Step 3: Build the Hinode example site**
 
 Still from the Hinode repo root, with `node_modules/.bin` on `PATH`:
 
 ```bash
-hugo -s exampleSite
+rm -rf exampleSite/public
+hugo -s exampleSite --ignoreVendorPaths="github.com/gethinode/mod-flexsearch/v5"
 ```
+
+`--ignoreVendorPaths` is **required**, not optional. Without it Hugo builds against the stale `_vendor/` copy of the module and reproduces the 1,899-character baseline exactly — a pass that tests none of your changes. The `rm -rf` is also required: `public/` is not cleaned between builds, so stale fingerprinted JS bundles accumulate and the Step 4 extraction can silently read an old one.
 
 Use the project-pinned binary via `PATH` as above. Do **not** run `npm run build:example` — its `prestart` re-vendors the module from the remote and would wipe out the local override. Do not start a second `hugo server` if a dev server is already running; it poisons the shared CSS cache.
 

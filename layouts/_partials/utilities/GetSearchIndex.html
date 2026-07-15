@@ -1,10 +1,6 @@
 {{- /*
-    Returns the URL of the per-language search index — the `searchindex` output
-    format rendered on the home page. Consumed by the search input layouts to
-    populate the data-search-index attribute the lazy runtime fetches.
+    Returns the URL of the per-language search index asset published by
+    assets/search-index.html. Consumed by the flexsearch runtime bundle to
+    know where to fetch the index data.
 */ -}}
-{{- $url := "" -}}
-{{- with site.Home.OutputFormats.Get "searchindex" -}}
-    {{- $url = .RelPermalink -}}
-{{- end -}}
-{{- return $url -}}
+{{- return relURL (partial "utilities/GetSearchIndexPath.html" site) -}}

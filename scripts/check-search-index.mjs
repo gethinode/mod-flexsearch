@@ -5,7 +5,7 @@
 */
 import { readFile } from 'node:fs/promises'
 
-const INDEX = 'exampleSite/public/flexsearch-index.json'
+const INDEX = 'exampleSite/public/js/flexsearch-index.en.json'
 const MAX_DESCRIPTION = 100
 const ELLIPSIS = '...'
 const MAX_LENGTH = MAX_DESCRIPTION + ELLIPSIS.length
@@ -19,7 +19,7 @@ try {
   docs = JSON.parse(await readFile(INDEX, 'utf8'))
 } catch (err) {
   console.error(`unable to read ${INDEX}: ${err.message}`)
-  console.error('run `pnpm build` first, and confirm the exampleSite emits the searchindex output format')
+  console.error('run `pnpm build` first, and confirm the exampleSite publishes the search index asset')
   process.exit(1)
 }
 

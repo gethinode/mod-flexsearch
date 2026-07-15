@@ -48,13 +48,19 @@ This module supports the following parameters (see the section `params.modules` 
 | `flexsearch.frontmatter`  | false    | If set, includes front matter in the page content. The search index function adds all parameters with the name `content`, `heading`, `title`, `preheading` recursively. |
 | `flexsearch.filter`       | "params" | Restricts the scanned frontmatter variables to the named filter. By default, all front matter variables are scanned. Only applicable when `flexsearch.frontmatter` is set. |
 | `flexsearch.summaryOnly`  | false    | If set, indexes each page's summary instead of its full content. Reduces the size of the generated search index considerably on large sites, at the cost of matching only summary text. |
-| `flexsearch.lazyLoad`     | false    | If set, the search index is emitted as a separate per-language JSON file and fetched on the visitor's first search interaction, instead of being bundled into the core script loaded on every page. See the note below on Content Security Policy. |
+| `flexsearch.lazyLoad`     | false    | If set, postpones fetching the search index until the visitor's first search interaction. By default the index is fetched as soon as the page's scripts run. See the note below on how the index is published. |
 
 > [!NOTE]
-> With `flexsearch.lazyLoad` enabled the search index is fetched at runtime. A
-> site that sets a strict Content Security Policy must allow `connect-src 'self'`.
-> The module declares this directive in its `csp` block, so sites using the
-> Hinode CSP module pick it up automatically.
+> The search index is published as a separate per-language JSON asset
+> (`js/flexsearch-index.<lang>.json`) and fetched at runtime; it is not bundled
+> into the core script loaded on every page. The asset is generated after all
+> pages have rendered (via `templates.Defer`), which keeps the index build off
+> the render critical path and speeds up site builds. A site that sets a strict
+> Content Security Policy must allow `connect-src 'self'`. The module declares
+> this directive in its `csp` block, so sites using the Hinode CSP module pick
+> it up automatically. Sites that override the `search-input.html` partial or
+> the `ModalSearch` shortcode must keep the include of
+> `assets/search-index.html`, which publishes the index asset.
 
 In addition, the module recognizes the following site parameters (see the section `params.navigation` in `config.toml`):.
 

@@ -1,5 +1,4 @@
 {{- $search := partial "utilities/GetSearchConfig.html" (dict "search" true) -}}
-{{- $lazy := site.Params.modules.flexsearch.lazyLoad | default false -}}
 
 {{- if $search.modal }}
     <div id="search-modal" class="modal fade search-modal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true" aria-modal="true">
@@ -8,7 +7,7 @@
                 <div class="modal-header">
                     <div class="w-100">
                         <form class="search position-relative me-auto">
-                            <input id="search-input-modal" class="search-input form-control is-search" tabindex="1" type="search" placeholder="{{ T "ui_search" }}..." aria-label="{{ T "ui_search" }}" autocomplete="off"{{ if $lazy }} data-search-index="{{ partialCached "utilities/GetSearchIndex.html" page page.Language.Lang }}"{{ end }}>
+                            <input id="search-input-modal" class="search-input form-control is-search" tabindex="1" type="search" placeholder="{{ T "ui_search" }}..." aria-label="{{ T "ui_search" }}" autocomplete="off">
                         </form>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ T "close" }}"></button>
@@ -18,5 +17,6 @@
                 </div>
             </div>
         </div>
-    </div> 
+    </div>
+    {{- partial "assets/search-index.html" . -}}
 {{ end -}}

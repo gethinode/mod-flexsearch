@@ -2,24 +2,32 @@
     Builds the list of documents for the FlexSearch index. Returns a slice of
     dicts with the keys: id, href, title, description, content.
 
-    This is the single source of truth for index documents — it is consumed
-    both by the eager path (flexsearch.index.js, inline index.add() calls) and
-    the lazy path (flexsearch-index.json, fetched on demand).
+    This is the single source of truth for index documents — it is consumed by
+    assets/search-index.html, which publishes them as a per-language JSON asset
+    from a deferred template (after all pages have rendered).
 
     Honors the params.modules.flexsearch settings: canonifyURLs, summaryOnly,
     frontmatter, filter. Pages without a title and pages with searchExclude
     are omitted.
+
+    Context: a dict with the key "site" holding the (language) Site to index.
+    Passing the site explicitly is required because this partial runs inside
+    templates.Defer, where the `site` global does not reliably reflect the
+    language that registered the deferred block. A bare (non-dict) context
+    falls back to the `site` global for backward compatibility.
 */ -}}
-{{- $sections := where (where site.Pages "Kind" "section") "Title" "!=" "" -}}
-{{- $list := where site.RegularPages "Title" "!=" "" | append $sections -}}
+{{- $site := site -}}
+{{- if reflect.IsMap . }}{{ with .site }}{{ $site = . }}{{ end }}{{ end -}}
+{{- $sections := where (where $site.Pages "Kind" "section") "Title" "!=" "" -}}
+{{- $list := where $site.RegularPages "Title" "!=" "" | append $sections -}}
 {{- $list = where $list ".Params.searchExclude" "!=" true -}}
 {{- $docs := slice -}}
 {{- range $index, $element := sort $list "Title" "asc" -}}
     {{- $url := .RelPermalink -}}
-    {{- if site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end -}}
+    {{- if $site.Params.modules.flexsearch.canonifyURLs }}{{ $url = .Permalink }}{{ end -}}
     {{- $title := or .Params.indexTitle .LinkTitle .Title -}}
     {{- if gt (strings.RuneCount $title) 33 }}{{ $title = print (substr $title 0 30) "..." }}{{ end -}}
-    {{- if and site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end -}}
+    {{- if and $site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end -}}
     {{- $description := "" -}}
     {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = $element.Summary }}{{ end -}}
     {{/*
@@ -42,13 +50,13 @@
     {{- $description = $description | plainify | htmlUnescape -}}
     {{- $description = trim (replaceRE `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` " " $description) " " | truncate 100 "..." | htmlUnescape -}}
     {{- $content := "" -}}
-    {{- if site.Params.modules.flexsearch.summaryOnly -}}
+    {{- if $site.Params.modules.flexsearch.summaryOnly -}}
         {{- $content = replaceRE "[{}]" "" (.Summary | plainify) -}}
     {{- else -}}
         {{- $content = replaceRE "[{}]" "" .Plain -}}
     {{- end -}}
-    {{- if site.Params.modules.flexsearch.frontmatter -}}
-        {{- $key := site.Params.modules.flexsearch.filter | default "params" -}}
+    {{- if $site.Params.modules.flexsearch.frontmatter -}}
+        {{- $key := $site.Params.modules.flexsearch.filter | default "params" -}}
         {{- $val := slice -}}
         {{- if ne $key "params" }}{{ $val = index .Params $key }}{{ else }}{{ $val = .Params }}{{ end -}}
         {{- $content = printf "%s %s" (partial "assets/search-meta.html" (dict "key" $key "val" $val)) $content -}}

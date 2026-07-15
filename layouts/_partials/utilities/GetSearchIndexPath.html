@@ -1,0 +1,11 @@
+{{- /*
+    Returns the publish path of the per-language search index asset, e.g.
+    "js/flexsearch-index.en.json". The path is deterministic on purpose: the
+    producer (assets/search-index.html, which publishes the resource from a
+    deferred template after all pages have rendered) and the consumers (the
+    flexsearch runtime bundle and utilities/GetSearchIndex.html) must agree on
+    the location before the resource exists.
+
+    Context: the (language) Site whose index is addressed.
+*/ -}}
+{{- return printf "js/flexsearch-index.%s.json" .Language.Lang -}}

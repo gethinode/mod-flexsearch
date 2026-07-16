@@ -51,10 +51,12 @@ The module imports `github.com/nextapps-de/flexsearch` and mounts its bundle to 
 - `layouts/_partials/assets/search-input.html`: Embedded search form HTML structure
 - `layouts/_shortcodes/ModalSearch.html`: Modal search dialog structure
 - `layouts/_partials/assets/search-meta.html`: Recursive helper to extract frontmatter content for indexing
-- `layouts/_partials/utilities/GetSearchDocs.html`: Single source of truth — builds the slice of index documents (consumed by both the eager JS and the lazy JSON output)
-- `layouts/index.searchindex.json`: Layout for the `searchindex` output format — emits the index documents as JSON on the home page (lazy mode)
-- `layouts/_partials/utilities/GetSearchIndex.html`: Returns the URL of the search-index output (lazy mode)
-- `assets/js/modules/flexsearch/flexsearch.index.js`: FlexSearch initialization and search logic
+- `layouts/_partials/utilities/GetSearchDocs.html`: Single source of truth — builds the slice of index documents (accepts an explicit `site` because it runs inside `templates.Defer`)
+- `layouts/_partials/assets/search-index.html`: Publishes the index documents as a per-language JSON asset from a `templates.Defer` block — i.e. after all pages have rendered, keeping the expensive `.Plain` walk off the render critical path. Included by `search-input.html` and `ModalSearch.html`; renders no output
+- `layouts/_partials/utilities/GetSearchIndexPath.html`: Returns the deterministic publish path of the index asset (`js/flexsearch-index.<lang>.json`)
+- `layouts/_partials/utilities/GetSearchIndex.html`: Returns the URL of the index asset (embedded into the runtime bundle at build time)
+- `layouts/index.searchindex.json`: Legacy layout for the deprecated `searchindex` output format — now always emits an empty array; kept so sites that still list the format keep building
+- `assets/js/modules/flexsearch/flexsearch.index.js`: FlexSearch initialization and search logic; fetches the index asset at runtime
 
 **Search index configuration:**
 - The index documents are built by `GetSearchDocs.html` from Hugo's page content
@@ -64,13 +66,17 @@ The module imports `github.com/nextapps-de/flexsearch` and mounts its bundle to 
 - Can use absolute URLs via `flexsearch.canonifyURLs` parameter
 - Pages can be excluded with `searchExclude: true` in frontmatter
 - Supports optional `indexTitle` parameter to override title in search results
-- **Eager mode (default):** `flexsearch.index.js` emits one flat `index.add(...)`
-  statement per page into the core bundle (a chained `.add()` expression
-  overflows the minifier's expression-nesting limit on large sites)
-- **Lazy mode (`flexsearch.lazyLoad`):** the index is emitted as a separate
-  per-language JSON file via the `searchindex` output format and fetched on
-  the first search interaction (a normal page render, so page content can be
-  aggregated safely — unlike a detached resource template)
+- The index payload is never bundled into the page scripts: it is published as
+  a per-language JSON asset (`js/flexsearch-index.<lang>.json`) from a
+  `templates.Defer` block, so the `.Plain` walk over all pages runs after the
+  site has rendered (reusing Hugo's cached content) instead of serializing the
+  render pipeline inside the script-bundle mutex
+- **Eager fetch (default):** the runtime fetches the JSON as soon as the core
+  bundle executes on a page with a search input
+- **Lazy fetch (`flexsearch.lazyLoad`):** the fetch is postponed until the
+  first search interaction (focus/click on the input, or opening the modal)
+- Requires CSP `connect-src 'self'` in both modes; the module declares it in
+  its `csp` block
 
 **Search behavior:**
 - Shows up to 5 results across title, description, and content fields
@@ -93,7 +99,7 @@ Module configuration in `config.toml` under `params.modules.flexsearch`:
 - `frontmatter` (default: false): Include frontmatter content in search index
 - `filter` (default: "params"): Restrict frontmatter scanning to specific key
 - `summaryOnly` (default: false): Index page summaries instead of full content
-- `lazyLoad` (default: false): Emit the index as a separate JSON file fetched on first search interaction, instead of bundling it into every page
+- `lazyLoad` (default: false): Postpone fetching the search-index JSON until the first search interaction, instead of fetching it as soon as the page's scripts run
 - `localize` (default: true): Enable language-specific search
 
 Navigation configuration under `params.navigation.search`:

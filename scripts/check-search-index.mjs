@@ -5,7 +5,7 @@
 */
 import { readFile } from 'node:fs/promises'
 
-const INDEX = 'exampleSite/public/flexsearch-index.json'
+const INDEX = 'exampleSite/public/js/flexsearch-index.en.json'
 const MAX_DESCRIPTION = 100
 const ELLIPSIS = '...'
 const MAX_LENGTH = MAX_DESCRIPTION + ELLIPSIS.length
@@ -19,7 +19,7 @@ try {
   docs = JSON.parse(await readFile(INDEX, 'utf8'))
 } catch (err) {
   console.error(`unable to read ${INDEX}: ${err.message}`)
-  console.error('run `pnpm build` first, and confirm the exampleSite emits the searchindex output format')
+  console.error('run `pnpm build` first, and confirm the exampleSite publishes the search index asset')
   process.exit(1)
 }
 
@@ -30,6 +30,17 @@ if (!Array.isArray(docs) || docs.length === 0) {
 for (const doc of docs) {
   const description = doc.description ?? ''
   const where = `"${doc.title}"`
+
+  // A page that demos the search UI inside its own content embeds the deferred
+  // search-index publisher in .Content, which leaves a raw templates.Defer
+  // placeholder (`__hdeferred/<id>__d=`) in the .Plain that GetSearchDocs.html
+  // reads inside the deferred block. GetSearchDocs.html strips it; a leak here
+  // means that strip regressed. Checked on every field of every doc.
+  for (const [field, value] of Object.entries(doc)) {
+    if (typeof value === 'string' && value.includes('__hdeferred')) {
+      fail(`${where}: ${field} leaks a templates.Defer placeholder — ${excerpt(value)}`)
+    }
+  }
 
   // Hugo caps by rune, not UTF-16 code unit; count runes here too, otherwise a
   // correctly-capped description containing astral characters (e.g. emoji) would
@@ -120,6 +131,16 @@ if (!eighth) {
   if (eighthRuneLength < MIN_CJK_RUNE_LENGTH) {
     fail(`fixture "Eighth page" description is only ${eighthRuneLength} runes, under the ${MIN_CJK_RUNE_LENGTH}-rune floor — truncation likely cut by byte, not by rune — ${excerpt(eighth.description)}`)
   }
+}
+
+/*
+  "Ninth page" embeds the search UI in its own content via the search-demo
+  shortcode — the only fixture whose .Plain carries a deferred placeholder
+  token, so the leak assertion above would pass vacuously without it.
+*/
+const ninth = docs.find((doc) => doc.title === 'Ninth page')
+if (!ninth) {
+  fail('fixture page "Ninth page" is missing from the index')
 }
 
 if (failures.length > 0) {

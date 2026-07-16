@@ -1,0 +1,25 @@
+{{- /*
+    Publishes the per-language search index as a standalone JSON asset. The
+    heavy lifting (GetSearchDocs.html touches `.Plain` of every page) runs
+    inside templates.Defer, i.e. AFTER all pages have rendered: `.Plain` then
+    reuses Hugo's cached content instead of forcing serial page renders inside
+    the script-bundle mutex, which used to stall the whole render pipeline.
+
+    The block renders no output — the deferred placeholder is replaced with an
+    empty string — so including this partial leaves the page HTML untouched.
+    It is keyed per language: no matter how many pages include it, the index
+    is built exactly once per language.
+
+    Include it from every template that renders a search UI (search-input.html
+    and ModalSearch.html do); without at least one inclusion per language the
+    index asset is not published and the runtime fetch would 404.
+*/ -}}
+{{- with (templates.Defer (dict
+    "key" (printf "flexsearch-index-%s" site.Language.Lang)
+    "data" (dict "site" site)
+)) -}}
+    {{- $site := .site -}}
+    {{- $docs := partial "utilities/GetSearchDocs.html" (dict "site" $site) -}}
+    {{- $index := resources.FromString (partial "utilities/GetSearchIndexPath.html" $site) ($docs | jsonify) -}}
+    {{- $noop := $index.RelPermalink -}}
+{{- end -}}

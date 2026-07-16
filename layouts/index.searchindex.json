@@ -1,15 +1,9 @@
 {{- /*
-    Renders the FlexSearch index documents as a JSON array. Emitted as the
-    `searchindex` output format on the home page so the data is built during a
-    normal page render (where the page context is available) rather than from a
-    detached resource template.
-
-    The lazy runtime fetches this file on the first search interaction. When
-    lazyLoad is disabled the file is still emitted, but empty — the index is
-    bundled into the core script instead.
+    Layout for the legacy `searchindex` output format. Deprecated: the search
+    index is now always published as a per-language asset (see
+    utilities/GetSearchIndexPath.html) by assets/search-index.html, from a
+    deferred template that runs after all pages have rendered. This layout
+    remains so sites that still list the `searchindex` output format for the
+    home page keep building; it emits an empty array.
 */ -}}
-{{- if site.Params.modules.flexsearch.lazyLoad -}}
-{{- (partial "utilities/GetSearchDocs.html" .) | jsonify -}}
-{{- else -}}
 []
-{{- end -}}

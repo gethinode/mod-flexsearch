@@ -34,12 +34,14 @@ var index = new FlexSearch.Document({
   }
 });
 
-{{ if $lazy -}}
 /*
-  Lazy mode: the index data is fetched from a standalone JSON resource the
-  first time the user interacts with search, instead of being bundled into
-  every page. The data URL is read from the search input's data-search-index
-  attribute (set by the search-input / ModalSearch layouts).
+  The index data is fetched from a standalone per-language JSON asset that is
+  published by the assets/search-index.html partial via templates.Defer, i.e.
+  after all pages have rendered. Keeping the payload out of the script bundle
+  keeps the expensive index build off the render critical path. By default the
+  fetch starts as soon as this script executes; with lazyLoad enabled it is
+  postponed until the first search interaction. A data-search-index attribute
+  on the search input (legacy lazy-mode layouts) overrides the built-in URL.
 */
 let indexStatus = 'idle'; // idle | loading | ready | error
 
@@ -47,12 +49,7 @@ function loadIndex() {
   if (indexStatus !== 'idle') return;
   indexStatus = 'loading';
 
-  const url = search.dataset.searchIndex;
-  if (!url) {
-    indexStatus = 'error';
-    console.error('flexsearch: missing data-search-index URL on the search input');
-    return;
-  }
+  const url = search.dataset.searchIndex || {{ partial "utilities/GetSearchIndex.html" . | jsonify }};
 
   fetch(url)
     .then((response) => {
@@ -71,19 +68,6 @@ function loadIndex() {
       console.error('flexsearch: failed to load search index', err);
     });
 }
-{{- else -}}
-/*
-Source:
-  - https://github.com/nextapps-de/flexsearch#index-documents-field-search
-  - https://raw.githack.com/nextapps-de/flexsearch/master/demo/autocomplete.html
-*/
-function initIndex() {
-  {{- range $doc := partial "utilities/GetSearchDocs.html" . }}
-  index.add({{ $doc | jsonify }});
-  {{- end }}
-  search.addEventListener('input', showResults, true);
-}
-{{- end }}
 
 function hideSuggestions(e) {
   var isClickInsideElement = suggestions.contains(e.target);
@@ -214,7 +198,7 @@ if (search !== null && suggestions !== null) {
   search.addEventListener('focus', loadIndex, { once: true });
   search.addEventListener('click', loadIndex, { once: true });
   {{- else -}}
-  initIndex();
+  loadIndex();
   {{- end }}
 }
 

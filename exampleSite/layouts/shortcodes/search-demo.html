@@ -1,0 +1,10 @@
+{{- /*
+    Renders the search input inside page content, the way a theme demos a
+    search-enabled component (e.g. Hinode's navbar shortcode with search
+    enabled). This embeds the deferred search-index publisher in the page's
+    .Content, leaving a raw templates.Defer placeholder in the in-memory
+    .Plain that GetSearchDocs.html reads inside the deferred block — the
+    fixture for the placeholder-stripping regression check in
+    scripts/check-search-index.mjs.
+*/ -}}
+{{ partial "assets/search-input.html" (dict "class" "border") }}

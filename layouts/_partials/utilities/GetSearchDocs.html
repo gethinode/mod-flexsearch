@@ -15,7 +15,16 @@
     templates.Defer, where the `site` global does not reliably reflect the
     language that registered the deferred block. A bare (non-dict) context
     falls back to the `site` global for backward compatibility.
+
+    Placeholder hygiene: a page that demos a search UI in its own content (e.g.
+    a navbar shortcode with search enabled) embeds the deferred search-index
+    publisher inside its .Content, which leaves a raw templates.Defer
+    placeholder token (`__hdeferred/<id>__d=`) in the in-memory .Plain/.Summary
+    read by this partial — Hugo only substitutes placeholders in published page
+    output, not in content strings captured inside a deferred block. Strip the
+    token (and one trailing whitespace) so the published index stays clean.
 */ -}}
+{{- $deferToken := `__hdeferred/\S+?__d=\s?` -}}
 {{- $site := site -}}
 {{- if reflect.IsMap . }}{{ with .site }}{{ $site = . }}{{ end }}{{ end -}}
 {{- $sections := where (where $site.Pages "Kind" "section") "Title" "!=" "" -}}
@@ -48,6 +57,8 @@
         in scripts/check-search-index.mjs flags as uncollapsed whitespace.
     */ -}}
     {{- $description = $description | plainify | htmlUnescape -}}
+    {{- /* strip defer placeholders before the truncate below can cut one in half */ -}}
+    {{- $description = replaceRE $deferToken "" $description -}}
     {{- $description = trim (replaceRE `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` " " $description) " " | truncate 100 "..." | htmlUnescape -}}
     {{- $content := "" -}}
     {{- if $site.Params.modules.flexsearch.summaryOnly -}}
@@ -55,6 +66,7 @@
     {{- else -}}
         {{- $content = replaceRE "[{}]" "" .Plain -}}
     {{- end -}}
+    {{- $content = replaceRE $deferToken "" $content -}}
     {{- if $site.Params.modules.flexsearch.frontmatter -}}
         {{- $key := $site.Params.modules.flexsearch.filter | default "params" -}}
         {{- $val := slice -}}

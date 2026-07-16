@@ -31,6 +31,17 @@ for (const doc of docs) {
   const description = doc.description ?? ''
   const where = `"${doc.title}"`
 
+  // A page that demos the search UI inside its own content embeds the deferred
+  // search-index publisher in .Content, which leaves a raw templates.Defer
+  // placeholder (`__hdeferred/<id>__d=`) in the .Plain that GetSearchDocs.html
+  // reads inside the deferred block. GetSearchDocs.html strips it; a leak here
+  // means that strip regressed. Checked on every field of every doc.
+  for (const [field, value] of Object.entries(doc)) {
+    if (typeof value === 'string' && value.includes('__hdeferred')) {
+      fail(`${where}: ${field} leaks a templates.Defer placeholder — ${excerpt(value)}`)
+    }
+  }
+
   // Hugo caps by rune, not UTF-16 code unit; count runes here too, otherwise a
   // correctly-capped description containing astral characters (e.g. emoji) would
   // false-fail against a .length that runs ahead of the true rune count.
@@ -120,6 +131,16 @@ if (!eighth) {
   if (eighthRuneLength < MIN_CJK_RUNE_LENGTH) {
     fail(`fixture "Eighth page" description is only ${eighthRuneLength} runes, under the ${MIN_CJK_RUNE_LENGTH}-rune floor — truncation likely cut by byte, not by rune — ${excerpt(eighth.description)}`)
   }
+}
+
+/*
+  "Ninth page" embeds the search UI in its own content via the search-demo
+  shortcode — the only fixture whose .Plain carries a deferred placeholder
+  token, so the leak assertion above would pass vacuously without it.
+*/
+const ninth = docs.find((doc) => doc.title === 'Ninth page')
+if (!ninth) {
+  fail('fixture page "Ninth page" is missing from the index')
 }
 
 if (failures.length > 0) {

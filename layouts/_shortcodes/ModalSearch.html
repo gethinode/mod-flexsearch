@@ -8,7 +8,7 @@
                 <div class="modal-header">
                     <div class="w-100">
                         <form class="search position-relative me-auto">
-                            <input id="search-input-modal" class="search-input form-control is-search" tabindex="1" type="search" placeholder="{{ T "ui_search" }}..." aria-label="{{ T "ui_search" }}" autocomplete="off"{{ if $lazy }} data-search-index="{{ partialCached "utilities/GetSearchIndex.html" page page.Language.Lang }}"{{ end }}>
+                            <input id="search-input-modal" class="search-input form-control is-search" tabindex="1" type="search" placeholder="{{ T "ui_search" }}..." aria-label="{{ T "ui_search" }}" autocomplete="off"{{ if $lazy }} data-search-index="{{ partialCached "utilities/GetSearchIndex.html" site site.Language.Lang }}"{{ end }}>
                         </form>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ T "close" }}"></button>

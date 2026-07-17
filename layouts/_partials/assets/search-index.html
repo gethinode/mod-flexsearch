@@ -13,13 +13,34 @@
     Include it from every template that renders a search UI (search-input.html
     and ModalSearch.html do); without at least one inclusion per language the
     index asset is not published and the runtime fetch would 404.
+
+    Hugo version gate: on Hugo < 0.164 a page that uses `resources.PostProcess`
+    silently prevents that page's `templates.Defer` blocks from executing — and
+    the theme's production stylesheet always uses `resources.PostProcess` (it is
+    how `css.PostCSS` is deferred so PurgeCSS reads a complete hugo_stats.json).
+    The deferred index would then never publish and its raw placeholder token
+    would leak into the rendered page. So on Hugo < 0.164 publish the index
+    EAGERLY instead: correct, at the cost of the serial-render stall that
+    templates.Defer was introduced to avoid. Guard the eager path to run once
+    per language via site.Store. Hugo >= 0.164 keeps the deferred path.
+    (hugo.Version.Compare returns > 0 when the running version is older.)
 */ -}}
-{{- with (templates.Defer (dict
-    "key" (printf "flexsearch-index-%s" site.Language.Lang)
-    "data" (dict "site" site)
-)) -}}
-    {{- $site := .site -}}
-    {{- $docs := partial "utilities/GetSearchDocs.html" (dict "site" $site) -}}
-    {{- $index := resources.FromString (partial "utilities/GetSearchIndexPath.html" $site) ($docs | jsonify) -}}
-    {{- $noop := $index.RelPermalink -}}
+{{- if le (hugo.Version.Compare "0.164.0") 0 -}}
+    {{- with (templates.Defer (dict
+        "key" (printf "flexsearch-index-%s" site.Language.Lang)
+        "data" (dict "site" site)
+    )) -}}
+        {{- $site := .site -}}
+        {{- $docs := partial "utilities/GetSearchDocs.html" (dict "site" $site) -}}
+        {{- $index := resources.FromString (partial "utilities/GetSearchIndexPath.html" $site) ($docs | jsonify) -}}
+        {{- $noop := $index.RelPermalink -}}
+    {{- end -}}
+{{- else -}}
+    {{- $guard := printf "flexsearch-index-eager-%s" site.Language.Lang -}}
+    {{- if not (site.Store.Get $guard) -}}
+        {{- site.Store.Set $guard true -}}
+        {{- $docs := partial "utilities/GetSearchDocs.html" (dict "site" site) -}}
+        {{- $index := resources.FromString (partial "utilities/GetSearchIndexPath.html" site) ($docs | jsonify) -}}
+        {{- $noop := $index.RelPermalink -}}
+    {{- end -}}
 {{- end -}}

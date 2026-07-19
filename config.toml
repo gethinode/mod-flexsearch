@@ -52,5 +52,11 @@
     summaryOnly = false
     lazyLoad = false
     localize = true
+    # flexsearch's UMD build doesn't self-register window.FlexSearch when bundled
+    # by esbuild, and its Node-guarded require('worker_threads') must be left as
+    # an esbuild external (it never executes in browsers).
+    externals = ["worker_threads"]
   [params.modules.flexsearch.csp]
     connect-src = ["'self'"]
+  [params.modules.flexsearch.globals]
+    "js/modules/flexsearch/flexsearch.bundle.min.js" = "FlexSearch"

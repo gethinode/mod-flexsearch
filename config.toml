@@ -58,5 +58,6 @@
     externals = ["worker_threads"]
   [params.modules.flexsearch.csp]
     connect-src = ["'self'"]
-  [params.modules.flexsearch.globals]
-    "js/modules/flexsearch/flexsearch.bundle.min.js" = "FlexSearch"
+  [[params.modules.flexsearch.globals]]
+    path = "js/modules/flexsearch/flexsearch.bundle.min.js"
+    name = "FlexSearch"

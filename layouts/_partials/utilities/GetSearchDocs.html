@@ -55,7 +55,9 @@
     {{- $rawText := "" -}}
     {{- if $raw }}{{ $rawText = replaceRE $shortcodeToken " " $element.RawContent | plainify }}{{ end -}}
     {{- $description := "" -}}
-    {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = cond $raw $rawText $element.Summary }}{{ end -}}
+    {{- /* no `cond` here: cond evaluates BOTH branches, so it would force .Summary (a
+         content-cache read) even in raw mode and reintroduce the eager-path deadlock */ -}}
+    {{- if .Description }}{{ $description = .Description }}{{ else if $raw }}{{ $description = $rawText }}{{ else }}{{ $description = $element.Summary }}{{ end -}}
     {{/*
         Both htmlUnescape calls below are load-bearing; neither may be dropped:
         - the first (before the whitespace collapse) decodes source entities, so e.g.

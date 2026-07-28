@@ -20,10 +20,19 @@
     how `css.PostCSS` is deferred so PurgeCSS reads a complete hugo_stats.json).
     The deferred index would then never publish and its raw placeholder token
     would leak into the rendered page. So on Hugo < 0.164 publish the index
-    EAGERLY instead: correct, at the cost of the serial-render stall that
-    templates.Defer was introduced to avoid. Guard the eager path to run once
-    per language via site.Store. Hugo >= 0.164 keeps the deferred path.
+    EAGERLY instead, guarded to run once per language via site.Store. Hugo
+    >= 0.164 keeps the deferred path.
     (hugo.Version.Compare returns > 0 when the running version is older.)
+
+    The eager path MUST pass "raw" true: it runs inside a page render, and
+    reading .Plain / .Summary of other pages from there deadlocks against
+    the theme's render-once design — every page render primes its own
+    .Content, so the render workers hold their pages' content-cache entries
+    while the eager index build waits for them, and vice versa. The build
+    then hangs indefinitely (typically at the start of the second language
+    of a multilingual site). Raw mode indexes .RawContent with shortcode
+    tags stripped and never touches the content cache; see
+    utilities/GetSearchDocs.html for details.
 */ -}}
 {{- if le (hugo.Version.Compare "0.164.0") 0 -}}
     {{- with (templates.Defer (dict
@@ -39,7 +48,7 @@
     {{- $guard := printf "flexsearch-index-eager-%s" site.Language.Lang -}}
     {{- if not (site.Store.Get $guard) -}}
         {{- site.Store.Set $guard true -}}
-        {{- $docs := partial "utilities/GetSearchDocs.html" (dict "site" site) -}}
+        {{- $docs := partial "utilities/GetSearchDocs.html" (dict "site" site "raw" true) -}}
         {{- $index := resources.FromString (partial "utilities/GetSearchIndexPath.html" site) ($docs | jsonify) -}}
         {{- $noop := $index.RelPermalink -}}
     {{- end -}}

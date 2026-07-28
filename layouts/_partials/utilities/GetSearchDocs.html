@@ -16,6 +16,18 @@
     language that registered the deferred block. A bare (non-dict) context
     falls back to the `site` global for backward compatibility.
 
+    The optional key "raw" (default false) switches the text source from the
+    rendered content (.Plain / .Summary) to the unrendered .RawContent with
+    shortcode tags stripped. The eager publisher on Hugo < 0.164 MUST set it:
+    it runs inside a page render, and reading .Plain / .Summary of other pages
+    from there deadlocks against Hinode's render-once design — every page
+    render primes its own .Content, so the render workers hold their pages'
+    content-cache entries while the eager index build waits for them, and
+    vice versa. The build then hangs indefinitely at the start of the second
+    language of a multilingual site. Raw mode never touches the content
+    cache, at the cost of indexing unexpanded shortcode output. The deferred
+    path (Hugo >= 0.164) keeps the fully rendered text.
+
     Placeholder hygiene: a page that demos a search UI in its own content (e.g.
     a navbar shortcode with search enabled) embeds the deferred search-index
     publisher inside its .Content, which leaves a raw templates.Defer
@@ -25,8 +37,10 @@
     token (and one trailing whitespace) so the published index stays clean.
 */ -}}
 {{- $deferToken := `__hdeferred/\S+?__d=\s?` -}}
+{{- $shortcodeToken := `{{[<%](?s:.)*?[>%]}}` -}}
 {{- $site := site -}}
-{{- if reflect.IsMap . }}{{ with .site }}{{ $site = . }}{{ end }}{{ end -}}
+{{- $raw := false -}}
+{{- if reflect.IsMap . }}{{ with .site }}{{ $site = . }}{{ end }}{{ $raw = .raw | default false }}{{ end -}}
 {{- $sections := where (where $site.Pages "Kind" "section") "Title" "!=" "" -}}
 {{- $list := where $site.RegularPages "Title" "!=" "" | append $sections -}}
 {{- $list = where $list ".Params.searchExclude" "!=" true -}}
@@ -37,8 +51,11 @@
     {{- $title := or .Params.indexTitle .LinkTitle .Title -}}
     {{- if gt (strings.RuneCount $title) 33 }}{{ $title = print (substr $title 0 30) "..." }}{{ end -}}
     {{- if and $site.Params.main.titleCase (not $element.Params.exact) }}{{ $title = title $title }}{{ end -}}
+    {{- /* raw text stands in for .Plain/.Summary in raw mode, see header */ -}}
+    {{- $rawText := "" -}}
+    {{- if $raw }}{{ $rawText = replaceRE $shortcodeToken " " $element.RawContent | plainify }}{{ end -}}
     {{- $description := "" -}}
-    {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = $element.Summary }}{{ end -}}
+    {{- with .Description }}{{ $description = . }}{{ else }}{{ $description = cond $raw $rawText $element.Summary }}{{ end -}}
     {{/*
         Both htmlUnescape calls below are load-bearing; neither may be dropped:
         - the first (before the whitespace collapse) decodes source entities, so e.g.
@@ -61,7 +78,11 @@
     {{- $description = replaceRE $deferToken "" $description -}}
     {{- $description = trim (replaceRE `[\s\p{Zs}\p{Zl}\p{Zp}\x{000B}\x{0085}\x{FEFF}]+` " " $description) " " | truncate 100 "..." | htmlUnescape -}}
     {{- $content := "" -}}
-    {{- if $site.Params.modules.flexsearch.summaryOnly -}}
+    {{- if $raw -}}
+        {{- $content = replaceRE "[{}]" "" $rawText -}}
+        {{- /* summaryOnly keeps the index small; approximate a summary from the raw text */ -}}
+        {{- if $site.Params.modules.flexsearch.summaryOnly }}{{ $content = substr $content 0 500 }}{{ end -}}
+    {{- else if $site.Params.modules.flexsearch.summaryOnly -}}
         {{- $content = replaceRE "[{}]" "" (.Summary | plainify) -}}
     {{- else -}}
         {{- $content = replaceRE "[{}]" "" .Plain -}}

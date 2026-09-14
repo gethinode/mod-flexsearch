@@ -24,6 +24,11 @@
     >= 0.164 keeps the deferred path.
     (hugo.Version.Compare returns > 0 when the running version is older.)
 
+    The use of templates.Defer when running a Hugo development server in watch
+    mode is known to be unstable (tested with Hugo v0.166.0). When a Hugo server
+    is detected, the index is loaded eagerly as fail-safe. Regular builds on
+    supported Hugo versions (v0.164.0 and later) still use lazy loading.
+
     The eager path MUST pass "raw" true: it runs inside a page render, and
     reading .Plain / .Summary of other pages from there deadlocks against
     the theme's render-once design — every page render primes its own
@@ -34,7 +39,7 @@
     tags stripped and never touches the content cache; see
     utilities/GetSearchDocs.html for details.
 */ -}}
-{{- if le (hugo.Version.Compare "0.164.0") 0 -}}
+{{- if and (le (hugo.Version.Compare "0.164.0") 0) (not hugo.IsServer) -}}
     {{- with (templates.Defer (dict
         "key" (printf "flexsearch-index-%s" site.Language.Lang)
         "data" (dict "site" site)

@@ -102,9 +102,13 @@ $search-background:                                    url("/icons/search.svg") 
     background-color: var(--bs-tertiary-bg);
 }
 
+// Block, not flex: a flex container turns the text into an anonymous flex item
+// that cannot shrink below its longest word, so a long title spilled across the
+// column divider. As blocks, a word too long for the column breaks inside it.
 .search-suggestions span {
-    display: flex;
+    display: block;
     font-size: $font-size-base;
+    overflow-wrap: break-word;
 }
 
 .suggestion__title {

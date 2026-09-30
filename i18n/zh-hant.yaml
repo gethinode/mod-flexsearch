@@ -5,3 +5,7 @@
   translation: "沒有結果"
 - id: close
   translation: "關閉"
+- id: ui_search_loading
+  translation: "正在載入搜尋索引…"
+- id: ui_search_unavailable
+  translation: "搜尋暫時無法使用"

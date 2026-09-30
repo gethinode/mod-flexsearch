@@ -5,3 +5,7 @@
   translation: "Keine Ergebnisse für"
 - id: close
   translation: "Schließen"
+- id: ui_search_loading
+  translation: "Suchindex wird geladen…"
+- id: ui_search_unavailable
+  translation: "Die Suche ist derzeit nicht verfügbar"

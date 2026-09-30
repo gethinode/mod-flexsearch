@@ -28,7 +28,7 @@ $search-background:                                    url("/icons/search.svg") 
     position: absolute;
     top: 0.4625rem;
     right: 0.5375rem;
-    display: flex;
+    display: var(--search-hint-display, flex);
     align-items: center;
     justify-content: center;
     height: 1.5rem;
@@ -39,6 +39,18 @@ $search-background:                                    url("/icons/search.svg") 
     content: "Ctrl + /";
     border: 1px solid var(--bs-border-color);
     border-radius: 0.25rem;
+}
+
+// Takes the place of the keyboard hint while the search index loads.
+.search-spinner {
+    position: absolute;
+    top: 0;
+    right: 0.75rem;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    color: var(--bs-secondary-color);
+    pointer-events: none;
 }
 
 .navbar-form {

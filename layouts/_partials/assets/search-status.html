@@ -1,0 +1,13 @@
+<!--
+    Renders the loading indicator of a search input. Include it inside the search form, directly after the input.
+    While the search index loads, the runtime shows the spinner in place of the keyboard hint and swaps the input's
+    placeholder for the loading message; when loading failed, the placeholder reads the unavailable message instead.
+    The visually hidden status region announces both states to assistive technology.
+
+    The markup is rendered server-side instead of being built by the runtime so that every class it uses is recorded
+    in hugo_stats.json; PurgeCSS would otherwise strip the spinner styles from a production stylesheet.
+-->
+<span class="search-spinner d-none" aria-hidden="true">
+    <span class="spinner-border spinner-border-sm"></span>
+</span>
+<span class="search-status visually-hidden" role="status" data-loading="{{ T "ui_search_loading" }}" data-unavailable="{{ T "ui_search_unavailable" }}"></span>

@@ -62,6 +62,16 @@ This module supports the following parameters (see the section `params.modules` 
 > the `ModalSearch` shortcode must keep the include of
 > `assets/search-index.html`, which publishes the index asset.
 
+Until the index is ready, a search interaction shows a spinner in place of the
+keyboard hint and a loading message as the input's placeholder, or an
+unavailable message when the index failed to load; a failed load is retried on
+the next interaction. The index is built in short slices that yield to the
+browser, so the page keeps responding to input while a large index loads. Sites
+that override the `search-input.html` partial or the `ModalSearch` shortcode
+should include `assets/search-status.html` directly after the search input to
+get the loading indicator; without it, search works as before but shows no
+progress.
+
 In addition, the module recognizes the following site parameters (see the section `params.navigation` in `config.toml`):.
 
 | Setting          | Default | Description |

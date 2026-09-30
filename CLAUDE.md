@@ -77,6 +77,16 @@ The module imports `github.com/nextapps-de/flexsearch` and mounts its bundle to 
   first search interaction (focus/click on the input, or opening the modal)
 - Requires CSP `connect-src 'self'` in both modes; the module declares it in
   its `csp` block
+- **Loading state:** until the index is ready, a search interaction shows the
+  indicator from `assets/search-status.html` inside the input: a spinner in
+  place of the keyboard hint and a loading placeholder, or an unavailable
+  placeholder on failure (a failed load retries on the next interaction). The
+  markup is rendered server-side so PurgeCSS sees its classes in
+  `hugo_stats.json`; the hint is hidden through the inline
+  `--search-hint-display` property rather than a runtime-only state class
+- **Non-blocking build:** documents are added in time-boxed slices that yield
+  to the browser (`scheduler.yield()`, else `setTimeout`), because adding a
+  multi-megabyte index in one loop blocks the main thread for seconds
 
 **Search behavior:**
 - Shows up to 5 results across title, description, and content fields
@@ -89,6 +99,8 @@ The module imports `github.com/nextapps-de/flexsearch` and mounts its bundle to 
 Translation files in `i18n/` provide localized strings for:
 - `ui_search`: Search input placeholder and aria-label
 - `ui_no_results`: Message when no results found
+- `ui_search_loading`: Status row text while the search index loads
+- `ui_search_unavailable`: Status row text when the search index failed to load
 
 Supported languages: en, de, fr, nl, pl, zh-hans, zh-hant
 

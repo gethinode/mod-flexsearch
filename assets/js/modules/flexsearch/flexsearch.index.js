@@ -2,6 +2,10 @@
 const search = document.querySelector('.search-input')
 const suggestions = document.querySelector('.search-suggestions')
 const background = document.querySelector('.search-background')
+const form = search !== null ? search.closest('.search') : null
+const spinner = form !== null ? form.querySelector('.search-spinner') : null
+const status = form !== null ? form.querySelector('.search-status') : null
+const placeholder = search !== null ? search.placeholder : ''
 
 const encoder = new FlexSearch.Encoder(FlexSearch.Charset.LatinSimple);
 encoder.assign({ minlength: 3 });
@@ -42,12 +46,20 @@ var index = new FlexSearch.Document({
   fetch starts as soon as this script executes; with lazyLoad enabled it is
   postponed until the first search interaction. A data-search-index attribute
   on the search input (legacy lazy-mode layouts) overrides the built-in URL.
+
+  Once the visitor interacts with the search input, the input reports the
+  state of the index until it is ready: a spinner and a loading placeholder
+  while it loads, or an unavailable placeholder when loading failed. A failed
+  load is retried on the next interaction.
 */
 let indexStatus = 'idle'; // idle | loading | ready | error
+let engaged = false; // whether the visitor has interacted with the search input
 
 function loadIndex() {
-  if (indexStatus !== 'idle') return;
+  if (indexStatus === 'loading' || indexStatus === 'ready') return;
   indexStatus = 'loading';
+  search.setAttribute('aria-busy', 'true');
+  renderStatus();
 
   const url = search.dataset.searchIndex || {{ partial "utilities/GetSearchIndex.html" . | jsonify }};
 
@@ -56,17 +68,82 @@ function loadIndex() {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     })
-    .then((docs) => {
-      for (const doc of docs) index.add(doc);
+    .then(addDocs)
+    .then(() => {
       indexStatus = 'ready';
+      search.removeAttribute('aria-busy');
       search.addEventListener('input', showResults, true);
+      renderStatus();
       // Honor a query typed while the index was still loading.
       if (search.value) showResults.call(search);
     })
     .catch((err) => {
+      // Retrying is safe after a partial build: FlexSearch updates a document
+      // whose id is already indexed instead of adding it twice.
       indexStatus = 'error';
+      search.removeAttribute('aria-busy');
+      renderStatus();
       console.error('flexsearch: failed to load search index', err);
     });
+}
+
+/*
+  Adding documents is synchronous and CPU-bound: a multi-megabyte index takes
+  seconds to build, which would block the main thread for the whole build and
+  freeze the spinner and any typing along with it. Instead, add the documents in
+  time-boxed slices and yield to the browser between slices, so it can paint and
+  handle input. A slice overruns its budget by at most the time one document
+  takes to add.
+*/
+const sliceBudget = 20; // milliseconds
+
+function yieldToMain() {
+  if (globalThis.scheduler && typeof globalThis.scheduler.yield === 'function') {
+    return globalThis.scheduler.yield();
+  }
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function addDocs(docs) {
+  let i = 0;
+  while (i < docs.length) {
+    const deadline = performance.now() + sliceBudget;
+    do {
+      index.add(docs[i++]);
+    } while (i < docs.length && performance.now() < deadline);
+    if (i < docs.length) await yieldToMain();
+  }
+}
+
+/*
+  Reflects the state of the index in the search input. The spinner takes the
+  place of the keyboard hint, which the stylesheet hides through the
+  --search-hint-display property: an inline custom property cannot be purged
+  from a production stylesheet, unlike a state class that only the runtime
+  sets. Layouts that predate the indicator render no .search-spinner and skip
+  this.
+*/
+function renderStatus() {
+  if (spinner === null || status === null) return;
+
+  const loading = engaged && indexStatus === 'loading';
+  const failed = engaged && indexStatus === 'error';
+
+  spinner.classList.toggle('d-none', !loading);
+  if (loading) {
+    form.style.setProperty('--search-hint-display', 'none');
+  } else {
+    form.style.removeProperty('--search-hint-display');
+  }
+  search.placeholder = loading ? status.dataset.loading : failed ? status.dataset.unavailable : placeholder;
+  status.textContent = loading ? status.dataset.loading : failed ? status.dataset.unavailable : '';
+}
+
+// Handles a search interaction: loads the index when needed and reports its state.
+function searchIntent() {
+  engaged = true;
+  loadIndex();
+  renderStatus();
 }
 
 function hideSuggestions(e) {
@@ -194,10 +271,10 @@ if (search !== null && suggestions !== null) {
   document.addEventListener('keydown', inputFocus);
   document.addEventListener('keydown', suggestionFocus);
   document.addEventListener('click', hideSuggestions);
-  {{ if $lazy -}}
-  search.addEventListener('focus', loadIndex, { once: true });
-  search.addEventListener('click', loadIndex, { once: true });
-  {{- else -}}
+  search.addEventListener('focus', searchIntent);
+  search.addEventListener('click', searchIntent);
+  search.addEventListener('input', searchIntent);
+  {{- if not $lazy }}
   loadIndex();
   {{- end }}
 }

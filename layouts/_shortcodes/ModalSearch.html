@@ -8,6 +8,7 @@
                     <div class="w-100">
                         <form class="search position-relative me-auto">
                             <input id="search-input-modal" class="search-input form-control is-search" tabindex="1" type="search" placeholder="{{ T "ui_search" }}..." aria-label="{{ T "ui_search" }}" autocomplete="off">
+                            {{- partial "assets/search-status.html" . -}}
                         </form>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ T "close" }}"></button>

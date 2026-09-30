@@ -5,3 +5,7 @@
   translation: "Geen resultaten voor"
 - id: close
   translation: "Sluiten"
+- id: ui_search_loading
+  translation: "Zoekindex wordt geladen…"
+- id: ui_search_unavailable
+  translation: "Zoeken is op dit moment niet beschikbaar"

@@ -6,7 +6,7 @@
   are the two fixtures whose own indexable directive overrides the site's. Run
   after `pnpm build`, which vendors the modules this build reads.
 */
-import { execFileSync } from 'node:child_process'
+import { execSync } from 'node:child_process'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -14,7 +14,9 @@ import { join } from 'node:path'
 const dest = await mkdtemp(join(tmpdir(), 'flexsearch-site-robots-'))
 let titles
 try {
-  execFileSync('hugo', ['--gc', '-s', 'exampleSite', '-d', dest, '--logLevel', 'error'], {
+  // One command string through the shell, as package.json runs hugo: on Windows
+  // the pnpm-installed hugo is a .cmd shim that only a shell resolves.
+  execSync(`hugo --gc -s exampleSite -d "${dest}" --logLevel error`, {
     env: { ...process.env, HUGO_PARAMS_META_ROBOTS: 'noindex' },
     stdio: ['ignore', 'ignore', 'inherit']
   })

@@ -65,6 +65,7 @@ The module imports `github.com/nextapps-de/flexsearch` and mounts its bundle to 
 - Can index page summaries instead of full content via `flexsearch.summaryOnly` parameter
 - Can use absolute URLs via `flexsearch.canonifyURLs` parameter
 - Pages can be excluded with `searchExclude: true` in frontmatter
+- Pages whose robots directive (`robots`, `meta.robots`, or the site's `params.meta.robots`) contains `noindex` or `none`, in any case, are excluded too
 - Supports optional `indexTitle` parameter to override title in search results
 - The index payload is never bundled into the page scripts: it is published as
   a per-language JSON asset (`js/flexsearch-index.<lang>.json`) from a

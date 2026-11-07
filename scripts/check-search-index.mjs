@@ -143,6 +143,38 @@ if (!ninth) {
   fail('fixture page "Ninth page" is missing from the index')
 }
 
+/*
+  Pages that must stay out of the index. Each robots fixture isolates one way the
+  directive can be spelled, so a check that misses any spelling fails here: a
+  `noindex` string, the `none` shorthand, mixed case, a list, and the `meta.robots`
+  key. "Third page (excluded)" and the untitled page guard the two older filters,
+  searchExclude and the empty-title filter.
+*/
+const EXCLUDED = [
+  ['Robots noindex page', 'robots: noindex'],
+  ['Robots none page', 'robots: none'],
+  ['Robots uppercase page', 'robots: NoIndex, NoFollow'],
+  ['Robots list page', 'robots: [noindex, follow]'],
+  ['Meta robots page', 'meta.robots: noindex'],
+  ['Third page (excluded)', 'searchExclude: true']
+]
+for (const [title, reason] of EXCLUDED) {
+  if (docs.some((doc) => doc.title === title)) {
+    fail(`fixture "${title}" is in the index, but ${reason} must exclude it`)
+  }
+}
+if (docs.some((doc) => doc.href === '/untitled/')) {
+  fail('fixture /untitled/ is in the index, but a page without a title must be excluded')
+}
+
+/*
+  "Robots index page" sets an explicit `index, follow` directive. It must stay, so
+  the robots filter cannot pass by dropping every page that sets robots at all.
+*/
+if (!docs.some((doc) => doc.title === 'Robots index page')) {
+  fail('fixture page "Robots index page" is missing from the index, but robots: index, follow must keep it')
+}
+
 if (failures.length > 0) {
   console.error(`FAIL ${INDEX}`)
   for (const failure of failures) console.error(`  - ${failure}`)

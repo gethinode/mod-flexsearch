@@ -7,8 +7,19 @@
     from a deferred template (after all pages have rendered).
 
     Honors the params.modules.flexsearch settings: canonifyURLs, summaryOnly,
-    frontmatter, filter. Pages without a title and pages with searchExclude
-    are omitted.
+    frontmatter, filter. Pages without a title, pages with searchExclude, and
+    pages whose robots directive forbids indexing are omitted.
+
+    Robots: a page is left out when its robots directive contains `noindex` or
+    `none` as a whole word, in any case. The directive is the first of the
+    page's `robots`, the page's `meta.robots` and the site's
+    `params.meta.robots` that is set, and may be a string or a list. This is
+    the rule of Hinode's utilities/IsIndexable.html and GetRobots.html, written
+    out here rather than called: this module does not depend on Hinode, so
+    Hinode's partials may be absent, and a local check is the one path the
+    exampleSite can test. Keep the two in step if Hinode's rule changes. The
+    page and site params are read from the pages of the explicit site, so they
+    resolve inside templates.Defer as searchExclude does.
 
     Context: a dict with the key "site" holding the (language) Site to index.
     Passing the site explicitly is required because this partial runs inside
@@ -44,6 +55,13 @@
 {{- $sections := where (where $site.Pages "Kind" "section") "Title" "!=" "" -}}
 {{- $list := where $site.RegularPages "Title" "!=" "" | append $sections -}}
 {{- $list = where $list ".Params.searchExclude" "!=" true -}}
+{{- /* robots filter, see header; mirrors Hinode's IsIndexable.html */ -}}
+{{- $indexable := slice -}}
+{{- range $list -}}
+    {{- $robots := printf "%v" (or .Params.robots .Params.meta.robots $site.Params.meta.robots "") -}}
+    {{- if not (findRE `(?i)\b(noindex|none)\b` $robots) }}{{ $indexable = $indexable | append . }}{{ end -}}
+{{- end -}}
+{{- $list = $indexable -}}
 {{- $docs := slice -}}
 {{- range $index, $element := sort $list "Title" "asc" -}}
     {{- $url := .RelPermalink -}}

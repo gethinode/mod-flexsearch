@@ -175,6 +175,14 @@ if (!docs.some((doc) => doc.title === 'Robots index page')) {
   fail('fixture page "Robots index page" is missing from the index, but robots: index, follow must keep it')
 }
 
+/*
+  "Robots partial-word page" holds noindex and none only inside longer tokens
+  (`noindexed`, `nonexistent`). It must stay: the match is on whole words only.
+*/
+if (!docs.some((doc) => doc.title === 'Robots partial-word page')) {
+  fail('fixture page "Robots partial-word page" is missing from the index, but noindex and none inside longer words must not exclude it')
+}
+
 if (failures.length > 0) {
   console.error(`FAIL ${INDEX}`)
   for (const failure of failures) console.error(`  - ${failure}`)

@@ -2,9 +2,9 @@
   Asserts that a site-wide robots directive reaches the search index. Rebuilds the
   exampleSite with params.meta.robots set to noindex (through Hugo's
   HUGO_PARAMS_META_ROBOTS environment variable) into a temporary directory, then
-  expects only "Robots index page" to remain: it is the one fixture whose own
-  `index, follow` directive overrides the site's. Run after `pnpm build`, which
-  vendors the modules this build reads.
+  expects only "Robots index page" and "Robots partial-word page" to remain: they
+  are the two fixtures whose own indexable directive overrides the site's. Run
+  after `pnpm build`, which vendors the modules this build reads.
 */
 import { execFileSync } from 'node:child_process'
 import { mkdtemp, readFile, rm } from 'node:fs/promises'
@@ -24,11 +24,11 @@ try {
   await rm(dest, { recursive: true, force: true })
 }
 
-const EXPECTED = ['Robots index page']
+const EXPECTED = ['Robots index page', 'Robots partial-word page']
 if (JSON.stringify(titles) !== JSON.stringify(EXPECTED)) {
   console.error('FAIL site-wide robots: noindex')
   console.error(`  - expected only ${JSON.stringify(EXPECTED)} in the index, got ${JSON.stringify(titles)}`)
   process.exit(1)
 }
 
-console.log('PASS site-wide robots: noindex leaves only the page that overrides it')
+console.log('PASS site-wide robots: noindex leaves only the pages that override it')

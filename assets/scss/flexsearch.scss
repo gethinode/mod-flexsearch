@@ -13,6 +13,12 @@ $headings-font-weight:        500 !default;
 
 $zindex-dropdown:             1000 !default;
 
+@function breakpoint-min($name, $breakpoints) {
+    $min: map-get($breakpoints, $name);
+    @if $min == 0 { @return null; }
+    @return $min;
+}
+
 // Media of at least the minimum breakpoint width. No query for the smallest breakpoint.
 // Makes the @content apply to the given breakpoint and wider.
 @mixin media-breakpoint-up($name, $breakpoints: $grid-breakpoints) {
